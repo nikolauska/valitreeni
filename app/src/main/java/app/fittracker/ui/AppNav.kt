@@ -24,6 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.fittracker.R
+import app.fittracker.ui.history.HistoryScreen
 import app.fittracker.ui.round.RoundScreen
 import app.fittracker.ui.settings.EditExerciseScreen
 import app.fittracker.ui.settings.NEW_EXERCISE_ID
@@ -33,6 +34,7 @@ import app.fittracker.ui.tutorial.TutorialScreen
 
 object Routes {
     const val TODAY = "today"
+    const val HISTORY = "history"
     const val SETTINGS = "settings"
     const val ROUND = "round"
     const val TUTORIAL = "tutorial/{id}"
@@ -45,6 +47,7 @@ private data class Tab(val route: String, @StringRes val label: Int, @DrawableRe
 
 private val tabs = listOf(
     Tab(Routes.TODAY, R.string.today_title, R.drawable.ic_nav_today),
+    Tab(Routes.HISTORY, R.string.history_title, R.drawable.ic_nav_history),
     Tab(Routes.SETTINGS, R.string.settings_title, R.drawable.ic_nav_settings),
 )
 
@@ -95,6 +98,7 @@ fun AppNav(openRoundRequest: Int, onRoundRequestHandled: () -> Unit) {
                     onOpenTutorial = { nav.navigate(Routes.tutorial(it)) },
                 )
             }
+            composable(Routes.HISTORY) { HistoryScreen() }
             composable(Routes.SETTINGS) {
                 SettingsScreen(
                     onEditExercise = { nav.navigate(Routes.edit(it)) },

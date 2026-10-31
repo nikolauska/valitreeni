@@ -113,4 +113,15 @@
     <string name="area_core">Core</string>
     <string name="area_back">Back</string>
     <string name="area_cardio">Cardio</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <plurals name="history_streak">
+        <item quantity="one">goal day in a row</item>
+        <item quantity="other">goal days in a row</item>
+    </plurals>
+    <string name="history_week">Last 7 days</string>
+    <string name="history_week_total">%1$s: %2$s this week</string>
+    <string name="history_goal_days">Goal days</string>
+    <string name="history_legend">Full = all focus goals met · light = some done · blank = none</string>
 </resources>

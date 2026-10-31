@@ -113,4 +113,15 @@
     <string name="area_core">Keskivartalo</string>
     <string name="area_back">Selkä</string>
     <string name="area_cardio">Kestävyys</string>
+
+    <!-- History -->
+    <string name="history_title">Historia</string>
+    <plurals name="history_streak">
+        <item quantity="one">tavoitepäivä putkeen</item>
+        <item quantity="other">tavoitepäivää putkeen</item>
+    </plurals>
+    <string name="history_week">Viimeiset 7 päivää</string>
+    <string name="history_week_total">%1$s: %2$s tällä viikolla</string>
+    <string name="history_goal_days">Tavoitepäivät</string>
+    <string name="history_legend">Täysi = kaikki fokustavoitteet tehty · vaalea = osa tehty · tyhjä = ei mitään</string>
 </resources>
