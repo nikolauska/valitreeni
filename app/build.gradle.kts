@@ -25,6 +25,16 @@ android {
     buildFeatures {
         compose = true
     }
+
+    androidResources {
+        // Lets Android list English and Finnish in the per-app language setting without a hand-kept XML list.
+        generateLocaleConfig = true
+    }
+
+    lint {
+        // Every string must exist in both English and Finnish; a missing translation should stop the build.
+        error += "MissingTranslation"
+    }
 }
 
 dependencies {

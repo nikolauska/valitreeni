@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fit Tracker</string>
+    <string name="today_title">Tänään</string>
+    <string name="today_empty">Ei vielä liikkeitä. Muistutukset ja päivän fokus tulevat seuraavaksi.</string>
+</resources>
