@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">Fit Tracker</string>
     <string name="today_title">Today</string>
-    <string name="today_empty">No moves yet. Reminders and daily focus come next.</string>
 
     <!-- Built-in move names -->
     <string name="move_pushups">Push-ups</string>
@@ -18,4 +17,36 @@
     <string name="move_mountain_climbers">Mountain climbers</string>
     <string name="move_burpees">Burpees</string>
     <string name="move_pullups">Pull-ups</string>
+
+    <!-- Today -->
+    <plurals name="focus_header">
+        <item quantity="one">Today\'s focus · %1$d of %2$d moves</item>
+        <item quantity="other">Today\'s focus · %1$d of %2$d moves</item>
+    </plurals>
+    <string name="others_header">Other moves</string>
+    <plurals name="streak_days">
+        <item quantity="one">🔥 %d day</item>
+        <item quantity="other">🔥 %d days</item>
+    </plurals>
+    <string name="next_reminder">Next reminder %s</string>
+    <string name="reminders_paused">Reminders are paused</string>
+    <string name="no_reminders">No reminder times set</string>
+    <string name="start_round">Start round</string>
+    <plurals name="round_moves">
+        <item quantity="one">%d move</item>
+        <item quantity="other">%d moves</item>
+    </plurals>
+    <string name="about_minutes">~%d min</string>
+    <string name="all_focus_done">All focus goals done today 🎉</string>
+    <string name="swap">Swap</string>
+    <string name="new_move">New</string>
+    <string name="progress_of">%1$s / %2$s</string>
+    <string name="amount_seconds">%d s</string>
+    <string name="amount_per_leg">%d / leg</string>
+    <string name="banner_notifications_off">Notifications are off, so reminders won\'t show.</string>
+    <string name="banner_turn_on">Turn on</string>
+    <string name="banner_battery">Battery saving can block reminders. Let Fit Tracker run unrestricted.</string>
+    <string name="banner_fix">Fix</string>
+    <string name="banner_missed_reminder">The %s reminder didn\'t arrive. Battery saving probably blocked it.</string>
+    <string name="banner_dismiss">OK</string>
 </resources>

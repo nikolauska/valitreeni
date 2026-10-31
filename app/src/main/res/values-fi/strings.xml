@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">Fit Tracker</string>
     <string name="today_title">Tänään</string>
-    <string name="today_empty">Ei vielä liikkeitä. Muistutukset ja päivän fokus tulevat seuraavaksi.</string>
 
     <!-- Built-in move names -->
     <string name="move_pushups">Punnerrukset</string>
@@ -18,4 +17,36 @@
     <string name="move_mountain_climbers">Vuorikiipeilijät</string>
     <string name="move_burpees">Burpeet</string>
     <string name="move_pullups">Leuanvedot</string>
+
+    <!-- Today -->
+    <plurals name="focus_header">
+        <item quantity="one">Päivän fokus · %1$d/%2$d liikettä</item>
+        <item quantity="other">Päivän fokus · %1$d/%2$d liikettä</item>
+    </plurals>
+    <string name="others_header">Muut liikkeet</string>
+    <plurals name="streak_days">
+        <item quantity="one">🔥 %d päivä</item>
+        <item quantity="other">🔥 %d päivää</item>
+    </plurals>
+    <string name="next_reminder">Seuraava muistutus klo %s</string>
+    <string name="reminders_paused">Muistutukset ovat tauolla</string>
+    <string name="no_reminders">Muistutusaikoja ei ole asetettu</string>
+    <string name="start_round">Aloita kierros</string>
+    <plurals name="round_moves">
+        <item quantity="one">%d liike</item>
+        <item quantity="other">%d liikettä</item>
+    </plurals>
+    <string name="about_minutes">~%d min</string>
+    <string name="all_focus_done">Kaikki päivän tavoitteet tehty 🎉</string>
+    <string name="swap">Vaihda</string>
+    <string name="new_move">Uusi</string>
+    <string name="progress_of">%1$s / %2$s</string>
+    <string name="amount_seconds">%d s</string>
+    <string name="amount_per_leg">%d / jalka</string>
+    <string name="banner_notifications_off">Ilmoitukset ovat pois päältä, joten muistutukset eivät näy.</string>
+    <string name="banner_turn_on">Ota käyttöön</string>
+    <string name="banner_battery">Akunsäästö voi estää muistutukset. Salli Fit Trackerin toimia rajoituksetta.</string>
+    <string name="banner_fix">Korjaa</string>
+    <string name="banner_missed_reminder">Klo %s muistutus ei tullut perille. Akunsäästö luultavasti esti sen.</string>
+    <string name="banner_dismiss">OK</string>
 </resources>

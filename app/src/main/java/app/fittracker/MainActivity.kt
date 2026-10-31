@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import app.fittracker.ui.TodayScreen
+import app.fittracker.ui.today.TodayScreen
 import app.fittracker.ui.theme.FitTrackerTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FitTrackerTheme {
-                TodayScreen()
+                TodayScreen(onStartRound = {}, onOpenTutorial = {})
             }
         }
     }
