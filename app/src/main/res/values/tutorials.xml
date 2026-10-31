@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from the reviewed plan text; edit here from now on. -->
+<resources>
+    <string-array name="tut_pushups_steps">
+        <item>Hands on the floor slightly wider than your shoulders, feet together.</item>
+        <item>Make one straight line from head to heels — squeeze glutes, tighten belly.</item>
+        <item>Lower until your chest is about a fist above the floor, elbows about 45° from your body.</item>
+        <item>Push the floor away back to the start.</item>
+    </string-array>
+    <string-array name="tut_pushups_avoid">
+        <item>Hips sagging or sticking up</item>
+        <item>Elbows flaring straight out to the sides</item>
+    </string-array>
+    <string name="tut_pushups_easier">Hands on a table or sofa edge, or knees on the floor</string>
+    <string name="tut_pushups_harder">Feet up on a chair</string>
+    <string-array name="tut_squats_steps">
+        <item>Feet shoulder-width apart, toes turned out a little.</item>
+        <item>Sit your hips back and down like onto a low chair, chest up.</item>
+        <item>Go down until thighs are about parallel to the floor, knees following your toes.</item>
+        <item>Push through the whole foot to stand up.</item>
+    </string-array>
+    <string-array name="tut_squats_avoid">
+        <item>Heels lifting off the floor</item>
+        <item>Knees caving inward</item>
+    </string-array>
+    <string name="tut_squats_easier">Squat down to touch a chair, then stand</string>
+    <string name="tut_squats_harder">Pause 2 s at the bottom</string>
+    <string-array name="tut_plank_steps">
+        <item>Forearms on the floor, elbows right under your shoulders, forearms pointing forward.</item>
+        <item>Step your feet back so your body is a straight line from head to heels.</item>
+        <item>Squeeze glutes and brace your belly like someone is about to poke it.</item>
+        <item>Look at the floor and keep breathing.</item>
+    </string-array>
+    <string-array name="tut_plank_avoid">
+        <item>Hips too high or sagging</item>
+        <item>Holding your breath</item>
+    </string-array>
+    <string name="tut_plank_easier">Knees on the floor</string>
+    <string name="tut_plank_harder">Lift one foot a few centimetres</string>
+    <string-array name="tut_glute_bridges_steps">
+        <item>Lie on your back, knees bent, feet flat and hip-width apart, heels about a hand away from your bum.</item>
+        <item>Push through your heels and lift your hips until knees, hips and shoulders are in a line.</item>
+        <item>Squeeze your glutes for 1 s at the top.</item>
+        <item>Lower slowly.</item>
+    </string-array>
+    <string-array name="tut_glute_bridges_avoid">
+        <item>Arching the lower back instead of using glutes</item>
+        <item>Pushing through the toes</item>
+    </string-array>
+    <string name="tut_glute_bridges_easier">Smaller lift</string>
+    <string name="tut_glute_bridges_harder">One leg at a time</string>
+    <string-array name="tut_superman_steps">
+        <item>Lie face down, arms straight forward, legs straight.</item>
+        <item>Lift arms, chest and legs a few centimetres off the floor at the same time.</item>
+        <item>Keep looking at the floor so your neck stays long.</item>
+        <item>Hold and breathe.</item>
+    </string-array>
+    <string-array name="tut_superman_avoid">
+        <item>Cranking the head up to look forward</item>
+        <item>Lifting so high it pinches the lower back</item>
+    </string-array>
+    <string name="tut_superman_easier">Lift only arms, or only legs</string>
+    <string name="tut_superman_harder">Arms out in a Y shape</string>
+    <string-array name="tut_reverse_lunges_steps">
+        <item>Stand tall, feet hip-width apart.</item>
+        <item>Take a big step back with one foot.</item>
+        <item>Lower until both knees are about 90°, back knee just above the floor.</item>
+        <item>Push through the front heel to step back up. Switch legs.</item>
+    </string-array>
+    <string-array name="tut_reverse_lunges_avoid">
+        <item>Front knee caving inward</item>
+        <item>Leaning the upper body far forward</item>
+    </string-array>
+    <string name="tut_reverse_lunges_easier">Hold a wall or chair for balance</string>
+    <string name="tut_reverse_lunges_harder">Wear a loaded backpack</string>
+    <string-array name="tut_chair_dips_steps">
+        <item>Use a sturdy chair pushed against a wall. Sit on the edge, hands next to your hips, fingers forward.</item>
+        <item>Slide your bum off the front, feet flat and knees bent.</item>
+        <item>Bend your elbows straight back until they are about 90°.</item>
+        <item>Press back up.</item>
+    </string-array>
+    <string-array name="tut_chair_dips_avoid">
+        <item>Shoulders shrugging up to the ears</item>
+        <item>Going so deep it hurts the front of the shoulder</item>
+    </string-array>
+    <string name="tut_chair_dips_easier">Feet closer to the chair</string>
+    <string name="tut_chair_dips_harder">Legs straight</string>
+    <string-array name="tut_pike_pushups_steps">
+        <item>Start in a push-up position, then walk your feet in so your hips go high — an upside-down V.</item>
+        <item>Bend your elbows and lower the top of your head toward the floor just in front of your hands.</item>
+        <item>Press back up to the V.</item>
+    </string-array>
+    <string-array name="tut_pike_pushups_avoid">
+        <item>Elbows flaring wide</item>
+        <item>Hips dropping so it turns into a normal push-up</item>
+    </string-array>
+    <string name="tut_pike_pushups_easier">Smaller range</string>
+    <string name="tut_pike_pushups_harder">Feet up on a chair</string>
+    <string-array name="tut_hollow_hold_steps">
+        <item>Lie on your back. Press your lower back flat into the floor.</item>
+        <item>Lift your shoulders, arms reaching past your head.</item>
+        <item>Lift your straight legs a little off the floor — the body makes a shallow banana.</item>
+        <item>Hold. If your lower back lifts, raise your legs higher.</item>
+    </string-array>
+    <string-array name="tut_hollow_hold_avoid">
+        <item>Lower back coming off the floor</item>
+        <item>Pulling on the neck</item>
+    </string-array>
+    <string name="tut_hollow_hold_easier">Bend your knees and tuck them in</string>
+    <string name="tut_hollow_hold_harder">Lower arms and legs closer to the floor</string>
+    <string-array name="tut_wall_sit_steps">
+        <item>Stand with your back flat against a wall.</item>
+        <item>Walk your feet forward and slide down until knees are about 90°.</item>
+        <item>Knees right above the ankles, arms off your thighs.</item>
+        <item>Hold and breathe.</item>
+    </string-array>
+    <string-array name="tut_wall_sit_avoid">
+        <item>Knees ahead of the toes</item>
+        <item>Pushing on the thighs with your hands</item>
+    </string-array>
+    <string name="tut_wall_sit_easier">Sit higher on the wall</string>
+    <string name="tut_wall_sit_harder">Lift one foot</string>
+    <string-array name="tut_mountain_climbers_steps">
+        <item>Start in a high plank: hands under shoulders, body straight.</item>
+        <item>Drive one knee toward your chest.</item>
+        <item>Switch legs quickly, like running in place.</item>
+        <item>Keep your hips level. Each leg counts as one.</item>
+    </string-array>
+    <string-array name="tut_mountain_climbers_avoid">
+        <item>Hips bouncing up high</item>
+        <item>Hands creeping forward</item>
+    </string-array>
+    <string name="tut_mountain_climbers_easier">Step the feet in slowly, one at a time</string>
+    <string name="tut_mountain_climbers_harder">Go faster, or drive the knee toward the opposite elbow</string>
+    <string-array name="tut_burpees_steps">
+        <item>From standing, squat down and put your hands on the floor.</item>
+        <item>Jump or step your feet back into a plank.</item>
+        <item>Jump or step your feet back in.</item>
+        <item>Jump up with your arms overhead.</item>
+    </string-array>
+    <string-array name="tut_burpees_avoid">
+        <item>Hips sagging in the plank</item>
+        <item>Landing with stiff legs — land softly</item>
+    </string-array>
+    <string name="tut_burpees_easier">Step back and in, no jump</string>
+    <string name="tut_burpees_harder">Add a push-up in the plank</string>
+    <string-array name="tut_pullups_steps">
+        <item>Check the bar is securely mounted. Hang with hands a bit wider than your shoulders, palms facing away.</item>
+        <item>Pull your shoulder blades down first.</item>
+        <item>Pull until your chin is over the bar.</item>
+        <item>Lower all the way down slowly.</item>
+    </string-array>
+    <string-array name="tut_pullups_avoid">
+        <item>Swinging or kicking for momentum</item>
+        <item>Half reps that stop short at the bottom</item>
+    </string-array>
+    <string name="tut_pullups_easier">Jump up, then lower yourself slowly over 3–5 s</string>
+    <string name="tut_pullups_harder">Pause 2 s at the top</string>
+</resources>

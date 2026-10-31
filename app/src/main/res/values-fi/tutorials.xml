@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from the reviewed plan text; edit here from now on. -->
+<resources>
+    <string-array name="tut_pushups_steps">
+        <item>Kädet lattialle hieman hartioita leveämmälle, jalat yhdessä.</item>
+        <item>Pidä vartalo suorana linjana päästä kantapäihin – purista pakarat, jännitä vatsa.</item>
+        <item>Laskeudu, kunnes rinta on noin nyrkin verran lattian yläpuolella, kyynärpäät noin 45° kulmassa vartaloon.</item>
+        <item>Työnnä lattiaa poispäin takaisin alkuasentoon.</item>
+    </string-array>
+    <string-array name="tut_pushups_avoid">
+        <item>Lantio roikkuu tai nousee ylös</item>
+        <item>Kyynärpäät leviävät suoraan sivuille</item>
+    </string-array>
+    <string name="tut_pushups_easier">Kädet pöydän tai sohvan reunalla, tai polvet lattiassa</string>
+    <string name="tut_pushups_harder">Jalat tuolin päällä</string>
+    <string-array name="tut_squats_steps">
+        <item>Jalat hartioiden leveydellä, varpaat hieman ulospäin.</item>
+        <item>Vie lantiota taakse ja alas kuin istuisit matalalle tuolille, rinta ylhäällä.</item>
+        <item>Laskeudu, kunnes reidet ovat suunnilleen lattian suuntaiset ja polvet seuraavat varpaiden suuntaa.</item>
+        <item>Ponnista koko jalkapohjalla ylös.</item>
+    </string-array>
+    <string-array name="tut_squats_avoid">
+        <item>Kantapäät nousevat lattiasta</item>
+        <item>Polvet painuvat sisäänpäin</item>
+    </string-array>
+    <string name="tut_squats_easier">Kyykkää tuolille koskettaen ja nouse</string>
+    <string name="tut_squats_harder">2 s pito ala-asennossa</string>
+    <string-array name="tut_plank_steps">
+        <item>Kyynärvarret lattialla, kyynärpäät suoraan hartioiden alla, kyynärvarret osoittavat eteenpäin.</item>
+        <item>Vie jalat taakse niin, että vartalo on suora linja päästä kantapäihin.</item>
+        <item>Purista pakarat ja jännitä vatsa kuin joku olisi tönäisemässä sitä.</item>
+        <item>Katse lattiaan, ja muista hengittää.</item>
+    </string-array>
+    <string-array name="tut_plank_avoid">
+        <item>Lantio liian ylhäällä tai roikkuu</item>
+        <item>Hengityksen pidättäminen</item>
+    </string-array>
+    <string name="tut_plank_easier">Polvet lattiassa</string>
+    <string name="tut_plank_harder">Nosta toinen jalka muutaman sentin irti</string>
+    <string-array name="tut_glute_bridges_steps">
+        <item>Makaa selällään polvet koukussa, jalkapohjat lattiassa lantion leveydellä, kantapäät kämmenen mitan päässä pakaroista.</item>
+        <item>Paina kantapäillä ja nosta lantio, kunnes polvet, lantio ja hartiat ovat samassa linjassa.</item>
+        <item>Purista pakaroita 1 s yläasennossa.</item>
+        <item>Laske hitaasti alas.</item>
+    </string-array>
+    <string-array name="tut_glute_bridges_avoid">
+        <item>Alaselän notkistaminen pakaroiden käyttämisen sijaan</item>
+        <item>Työntäminen varpailla</item>
+    </string-array>
+    <string name="tut_glute_bridges_easier">Pienempi nosto</string>
+    <string name="tut_glute_bridges_harder">Yhdellä jalalla</string>
+    <string-array name="tut_superman_steps">
+        <item>Makaa vatsallaan, kädet suorina eteen, jalat suorina.</item>
+        <item>Nosta kädet, rintakehä ja jalat muutaman sentin irti lattiasta yhtä aikaa.</item>
+        <item>Pidä katse lattiassa, jotta niska pysyy pitkänä.</item>
+        <item>Pidä asento ja hengitä.</item>
+    </string-array>
+    <string-array name="tut_superman_avoid">
+        <item>Pään nostaminen katsomaan eteenpäin</item>
+        <item>Niin korkea nosto, että alaselkä puristuu</item>
+    </string-array>
+    <string name="tut_superman_easier">Nosta vain kädet tai vain jalat</string>
+    <string name="tut_superman_harder">Kädet Y-asennossa</string>
+    <string-array name="tut_reverse_lunges_steps">
+        <item>Seiso suorana, jalat lantion leveydellä.</item>
+        <item>Ota pitkä askel taaksepäin toisella jalalla.</item>
+        <item>Laskeudu, kunnes molemmat polvet ovat noin 90°, takapolvi juuri lattian yläpuolella.</item>
+        <item>Ponnista etujalan kantapäällä takaisin ylös. Vaihda jalkaa.</item>
+    </string-array>
+    <string-array name="tut_reverse_lunges_avoid">
+        <item>Etupolvi painuu sisäänpäin</item>
+        <item>Ylävartalo kallistuu paljon eteen</item>
+    </string-array>
+    <string name="tut_reverse_lunges_easier">Ota tukea seinästä tai tuolista</string>
+    <string name="tut_reverse_lunges_harder">Painava reppu selässä</string>
+    <string-array name="tut_chair_dips_steps">
+        <item>Käytä tukevaa tuolia seinää vasten. Istu reunalle, kädet lantion vieressä, sormet eteenpäin.</item>
+        <item>Siirrä pakarat reunan eteen, jalkapohjat lattiassa ja polvet koukussa.</item>
+        <item>Koukista kyynärpäitä suoraan taaksepäin noin 90° kulmaan.</item>
+        <item>Punnerra takaisin ylös.</item>
+    </string-array>
+    <string-array name="tut_chair_dips_avoid">
+        <item>Hartiat nousevat kohti korvia</item>
+        <item>Niin syvä lasku, että olkapään etuosaan sattuu</item>
+    </string-array>
+    <string name="tut_chair_dips_easier">Jalat lähempänä tuolia</string>
+    <string name="tut_chair_dips_harder">Jalat suorina</string>
+    <string-array name="tut_pike_pushups_steps">
+        <item>Aloita punnerrusasennosta ja kävele jalat lähemmäs käsiä, niin että lantio nousee korkealle – ylösalainen V.</item>
+        <item>Koukista kyynärpäitä ja laske päälaki kohti lattiaa juuri käsien eteen.</item>
+        <item>Punnerra takaisin V-asentoon.</item>
+    </string-array>
+    <string-array name="tut_pike_pushups_avoid">
+        <item>Kyynärpäät leviävät sivuille</item>
+        <item>Lantio laskee ja liike muuttuu tavalliseksi punnerrukseksi</item>
+    </string-array>
+    <string name="tut_pike_pushups_easier">Pienempi liikerata</string>
+    <string name="tut_pike_pushups_harder">Jalat tuolin päällä</string>
+    <string-array name="tut_hollow_hold_steps">
+        <item>Makaa selällään. Paina alaselkä tiiviisti lattiaan.</item>
+        <item>Nosta hartiat irti, kädet ojentuvat pään yli.</item>
+        <item>Nosta suorat jalat hieman irti lattiasta – vartalo muodostaa loivan banaanin.</item>
+        <item>Pidä asento. Jos alaselkä irtoaa, nosta jalkoja korkeammalle.</item>
+    </string-array>
+    <string-array name="tut_hollow_hold_avoid">
+        <item>Alaselkä irtoaa lattiasta</item>
+        <item>Niskasta vetäminen</item>
+    </string-array>
+    <string name="tut_hollow_hold_easier">Koukista polvet lähelle vartaloa</string>
+    <string name="tut_hollow_hold_harder">Laske kädet ja jalat lähemmäs lattiaa</string>
+    <string-array name="tut_wall_sit_steps">
+        <item>Seiso selkä tiiviisti seinää vasten.</item>
+        <item>Kävele jalkoja eteenpäin ja liu\'u alas, kunnes polvet ovat noin 90°.</item>
+        <item>Polvet suoraan nilkkojen yläpuolella, kädet irti reisistä.</item>
+        <item>Pidä asento ja hengitä.</item>
+    </string-array>
+    <string-array name="tut_wall_sit_avoid">
+        <item>Polvet varpaiden edessä</item>
+        <item>Käsillä reisiin nojaaminen</item>
+    </string-array>
+    <string name="tut_wall_sit_easier">Istu korkeammalla</string>
+    <string name="tut_wall_sit_harder">Nosta toinen jalka</string>
+    <string-array name="tut_mountain_climbers_steps">
+        <item>Aloita punnerrusasennosta: kädet hartioiden alla, vartalo suorana.</item>
+        <item>Vedä toinen polvi kohti rintaa.</item>
+        <item>Vaihda jalkaa nopeasti kuin juoksisit paikallaan.</item>
+        <item>Pidä lantio tasaisena. Jokainen jalka lasketaan yhdeksi.</item>
+    </string-array>
+    <string-array name="tut_mountain_climbers_avoid">
+        <item>Lantio pomppii ylös</item>
+        <item>Kädet valuvat eteenpäin</item>
+    </string-array>
+    <string name="tut_mountain_climbers_easier">Tuo jalat hitaasti yksi kerrallaan</string>
+    <string name="tut_mountain_climbers_harder">Nopeampi tahti, tai polvi kohti vastakkaista kyynärpäätä</string>
+    <string-array name="tut_burpees_steps">
+        <item>Kyykisty seisoma-asennosta ja laita kädet lattiaan.</item>
+        <item>Hyppää tai astu jalat taakse lankkuasentoon.</item>
+        <item>Hyppää tai astu jalat takaisin käsien luo.</item>
+        <item>Hyppää ylös kädet pään yläpuolelle.</item>
+    </string-array>
+    <string-array name="tut_burpees_avoid">
+        <item>Lantio roikkuu lankussa</item>
+        <item>Alastulo jäykin jaloin – laskeudu pehmeästi</item>
+    </string-array>
+    <string name="tut_burpees_easier">Astu taakse ja eteen ilman hyppyä</string>
+    <string name="tut_burpees_harder">Lisää punnerrus lankkuasentoon</string>
+    <string-array name="tut_pullups_steps">
+        <item>Varmista, että tanko on tukevasti kiinni. Roiku kädet hieman hartioita leveämmällä, kämmenet poispäin.</item>
+        <item>Vedä ensin lapaluut alas.</item>
+        <item>Vedä, kunnes leuka on tangon yläpuolella.</item>
+        <item>Laskeudu hitaasti aivan ala-asentoon asti.</item>
+    </string-array>
+    <string-array name="tut_pullups_avoid">
+        <item>Heiluminen tai potkiminen vauhdin saamiseksi</item>
+        <item>Vajaat toistot, jotka eivät käy ala-asennossa</item>
+    </string-array>
+    <string name="tut_pullups_easier">Hyppää ylös ja laskeudu hitaasti 3–5 sekunnissa</string>
+    <string name="tut_pullups_harder">2 s pito yläasennossa</string>
+</resources>

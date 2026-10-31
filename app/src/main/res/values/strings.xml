@@ -60,4 +60,21 @@
     <string name="notif_done_round">Done round</string>
     <string name="notif_snooze">Snooze %d min</string>
     <string name="notif_skip">Skip</string>
+
+    <!-- Round and tutorial -->
+    <string name="back">Back</string>
+    <string name="round_title">Mini round</string>
+    <string name="back_to_today">Back to Today</string>
+    <string name="new_move_see_how">New move — see how</string>
+    <plurals name="log_sets">
+        <item quantity="one">Log %d set</item>
+        <item quantity="other">Log %d sets</item>
+    </plurals>
+    <string name="tutorial_one_set">One set: %s</string>
+    <string name="tutorial_how_to">How to</string>
+    <string name="tutorial_avoid">Avoid</string>
+    <string name="tutorial_easier">Easier</string>
+    <string name="tutorial_harder">Harder</string>
+    <string name="tutorial_safety">Stop if you feel sharp pain. This is general guidance, not medical advice.</string>
+    <string name="tutorial_custom_move">This is a move you added yourself, so it has no tutorial.</string>
 </resources>

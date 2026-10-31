@@ -60,4 +60,21 @@
     <string name="notif_done_round">Kierros tehty</string>
     <string name="notif_snooze">Torku %d min</string>
     <string name="notif_skip">Ohita</string>
+
+    <!-- Round and tutorial -->
+    <string name="back">Takaisin</string>
+    <string name="round_title">Minikierros</string>
+    <string name="back_to_today">Takaisin tähän päivään</string>
+    <string name="new_move_see_how">Uusi liike — katso ohje</string>
+    <plurals name="log_sets">
+        <item quantity="one">Kirjaa %d sarja</item>
+        <item quantity="other">Kirjaa %d sarjaa</item>
+    </plurals>
+    <string name="tutorial_one_set">Yksi sarja: %s</string>
+    <string name="tutorial_how_to">Näin teet</string>
+    <string name="tutorial_avoid">Vältä</string>
+    <string name="tutorial_easier">Helpompi</string>
+    <string name="tutorial_harder">Vaikeampi</string>
+    <string name="tutorial_safety">Lopeta, jos tunnet terävää kipua. Tämä on yleistä ohjeistusta, ei lääketieteellistä neuvontaa.</string>
+    <string name="tutorial_custom_move">Tämä on itse lisäämäsi liike, joten sille ei ole ohjetta.</string>
 </resources>
