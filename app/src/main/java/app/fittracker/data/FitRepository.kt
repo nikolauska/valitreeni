@@ -67,6 +67,13 @@ class FitRepository(
 
     suspend fun exercise(id: Long): Exercise? = dao.exercise(id)?.toModel()
 
+    /** Every move with the goal that applies on [date], including disabled ones (for Settings). */
+    fun observeExercisesWithGoals(date: LocalDate): Flow<List<Pair<Exercise, Int>>> =
+        combine(dao.observeExercises(), dao.observeGoalChanges()) { exercises, changes ->
+            val models = changes.map { it.toModel() }
+            exercises.map { it.toModel() to (Goals.goalFor(it.id, date, models) ?: 0) }
+        }
+
     fun observeDay(date: LocalDate): Flow<DayView> =
         combine(
             dao.observeExercises(),

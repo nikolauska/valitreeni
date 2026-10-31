@@ -77,4 +77,40 @@
     <string name="tutorial_harder">Harder</string>
     <string name="tutorial_safety">Stop if you feel sharp pain. This is general guidance, not medical advice.</string>
     <string name="tutorial_custom_move">This is a move you added yourself, so it has no tutorial.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_reminders">Reminders</string>
+    <string name="settings_add_time">+ Add time</string>
+    <string name="settings_times_hint">Tap a time to remove it.</string>
+    <string name="settings_weekends">Remind on weekends</string>
+    <string name="settings_paused">Pause reminders</string>
+    <string name="settings_battery_ok">Battery: unrestricted, reminders can run.</string>
+    <string name="settings_battery_restricted">Battery: restricted. Reminders may be blocked; set the app to Unrestricted.</string>
+    <string name="settings_open_app_settings">Open app settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">Phone\'s language</string>
+    <string name="settings_moves">Moves</string>
+    <string name="settings_move_summary">%1$s per set · goal %2$s</string>
+    <string name="settings_move_off">off</string>
+    <string name="settings_add_move">+ Add your own move</string>
+    <string name="edit_new_move">New move</string>
+    <string name="edit_own_move">Your move</string>
+    <string name="edit_name">Name</string>
+    <string name="edit_counted_in">Counted in</string>
+    <string name="edit_unit_reps">reps</string>
+    <string name="edit_unit_seconds">seconds</string>
+    <string name="edit_body_area">Body area</string>
+    <string name="edit_per_set">One set (%s)</string>
+    <string name="edit_daily_goal">Daily goal (%s)</string>
+    <string name="edit_enabled">In rotation</string>
+    <string name="edit_enabled_hint">When off, the move is never picked for daily focus.</string>
+    <string name="edit_goal_note">A new goal applies from today. Past days keep the goal they had.</string>
+    <string name="edit_save">Save</string>
+    <string name="area_push">Push</string>
+    <string name="area_pull">Pull</string>
+    <string name="area_legs">Legs</string>
+    <string name="area_core">Core</string>
+    <string name="area_back">Back</string>
+    <string name="area_cardio">Cardio</string>
 </resources>

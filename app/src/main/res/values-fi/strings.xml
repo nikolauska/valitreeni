@@ -77,4 +77,40 @@
     <string name="tutorial_harder">Vaikeampi</string>
     <string name="tutorial_safety">Lopeta, jos tunnet terävää kipua. Tämä on yleistä ohjeistusta, ei lääketieteellistä neuvontaa.</string>
     <string name="tutorial_custom_move">Tämä on itse lisäämäsi liike, joten sille ei ole ohjetta.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Asetukset</string>
+    <string name="settings_reminders">Muistutukset</string>
+    <string name="settings_add_time">+ Lisää aika</string>
+    <string name="settings_times_hint">Napauta aikaa poistaaksesi sen.</string>
+    <string name="settings_weekends">Muistuta viikonloppuisin</string>
+    <string name="settings_paused">Muistutukset tauolle</string>
+    <string name="settings_battery_ok">Akku: ei rajoituksia, muistutukset toimivat.</string>
+    <string name="settings_battery_restricted">Akku: rajoitettu. Muistutukset voivat estyä; salli sovellus ilman rajoituksia.</string>
+    <string name="settings_open_app_settings">Avaa sovelluksen asetukset</string>
+    <string name="settings_language">Kieli</string>
+    <string name="settings_language_system">Puhelimen kieli</string>
+    <string name="settings_moves">Liikkeet</string>
+    <string name="settings_move_summary">%1$s / sarja · tavoite %2$s</string>
+    <string name="settings_move_off">pois päältä</string>
+    <string name="settings_add_move">+ Lisää oma liike</string>
+    <string name="edit_new_move">Uusi liike</string>
+    <string name="edit_own_move">Oma liike</string>
+    <string name="edit_name">Nimi</string>
+    <string name="edit_counted_in">Lasketaan</string>
+    <string name="edit_unit_reps">toistoina</string>
+    <string name="edit_unit_seconds">sekunteina</string>
+    <string name="edit_body_area">Kehon alue</string>
+    <string name="edit_per_set">Yksi sarja (%s)</string>
+    <string name="edit_daily_goal">Päivätavoite (%s)</string>
+    <string name="edit_enabled">Mukana kierrossa</string>
+    <string name="edit_enabled_hint">Pois päältä ollessaan liikettä ei valita päivän fokukseen.</string>
+    <string name="edit_goal_note">Uusi tavoite on voimassa tästä päivästä alkaen. Menneet päivät säilyttävät silloisen tavoitteensa.</string>
+    <string name="edit_save">Tallenna</string>
+    <string name="area_push">Työntö</string>
+    <string name="area_pull">Veto</string>
+    <string name="area_legs">Jalat</string>
+    <string name="area_core">Keskivartalo</string>
+    <string name="area_back">Selkä</string>
+    <string name="area_cardio">Kestävyys</string>
 </resources>
