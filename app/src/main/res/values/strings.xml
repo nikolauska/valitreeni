@@ -3,4 +3,19 @@
     <string name="app_name">Fit Tracker</string>
     <string name="today_title">Today</string>
     <string name="today_empty">No moves yet. Reminders and daily focus come next.</string>
+
+    <!-- Built-in move names -->
+    <string name="move_pushups">Push-ups</string>
+    <string name="move_squats">Squats</string>
+    <string name="move_plank">Plank</string>
+    <string name="move_glute_bridges">Glute bridges</string>
+    <string name="move_superman">Superman hold</string>
+    <string name="move_reverse_lunges">Reverse lunges</string>
+    <string name="move_chair_dips">Chair dips</string>
+    <string name="move_pike_pushups">Pike push-ups</string>
+    <string name="move_hollow_hold">Hollow body hold</string>
+    <string name="move_wall_sit">Wall sit</string>
+    <string name="move_mountain_climbers">Mountain climbers</string>
+    <string name="move_burpees">Burpees</string>
+    <string name="move_pullups">Pull-ups</string>
 </resources>

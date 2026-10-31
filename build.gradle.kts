@@ -4,4 +4,5 @@ plugins {
     // and the Compose compiler plugin must match the Kotlin compiler version exactly.
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.ksp) apply false
 }

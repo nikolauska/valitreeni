@@ -3,4 +3,19 @@
     <string name="app_name">Fit Tracker</string>
     <string name="today_title">Tänään</string>
     <string name="today_empty">Ei vielä liikkeitä. Muistutukset ja päivän fokus tulevat seuraavaksi.</string>
+
+    <!-- Built-in move names -->
+    <string name="move_pushups">Punnerrukset</string>
+    <string name="move_squats">Kyykyt</string>
+    <string name="move_plank">Lankku</string>
+    <string name="move_glute_bridges">Lantionnostot</string>
+    <string name="move_superman">Superman-pito</string>
+    <string name="move_reverse_lunges">Takaaskelkyykyt</string>
+    <string name="move_chair_dips">Tuolidipit</string>
+    <string name="move_pike_pushups">Pike-punnerrukset</string>
+    <string name="move_hollow_hold">Hollow-pito</string>
+    <string name="move_wall_sit">Seinäistunta</string>
+    <string name="move_mountain_climbers">Vuorikiipeilijät</string>
+    <string name="move_burpees">Burpeet</string>
+    <string name="move_pullups">Leuanvedot</string>
 </resources>

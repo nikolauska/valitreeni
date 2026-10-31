@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -14,6 +15,7 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -31,10 +33,20 @@ android {
         generateLocaleConfig = true
     }
 
+    testOptions {
+        // Domain logic is plain Kotlin; returning defaults keeps stray android.* calls in tests from crashing them.
+        unitTests.isReturnDefaultValues = true
+    }
+
     lint {
         // Every string must exist in both English and Finnish; a missing translation should stop the build.
         error += "MissingTranslation"
     }
+}
+
+ksp {
+    // Exported schemas let future migrations be checked against what is already on the phone.
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -45,7 +57,19 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.datastore.preferences)
+    // Pinned so the app and kotlinx-coroutines-test agree on the same coroutines version.
+    implementation(libs.kotlinx.coroutines.android)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 }
