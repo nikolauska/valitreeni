@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fit Tracker</string>
+    <string name="today_title">Today</string>
+    <string name="today_empty">No moves yet. Reminders and daily focus come next.</string>
+</resources>
