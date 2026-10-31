@@ -55,14 +55,29 @@ class ReminderScheduleTest {
 
     @Test
     fun `reminder is missed when its time is long past and nothing fired`() {
-        assertTrue(ReminderSchedule.isMissed(due.plusSeconds(31 * 60), due, lastFired = due.minusSeconds(3 * 3600)))
-        assertTrue(ReminderSchedule.isMissed(due.plusSeconds(31 * 60), due, lastFired = null))
+        assertTrue(ReminderSchedule.isMissed(due.plusSeconds(76 * 60), due, lastFired = due.minusSeconds(3 * 3600)))
+        assertTrue(ReminderSchedule.isMissed(due.plusSeconds(76 * 60), due, lastFired = null))
     }
 
     @Test
     fun `reminder is not missed within the grace period or after it fired`() {
-        assertFalse(ReminderSchedule.isMissed(due.plusSeconds(10 * 60), due, lastFired = null))
+        // OnePlus may deliver up to an hour late; that is not "missed" yet.
+        assertFalse(ReminderSchedule.isMissed(due.plusSeconds(60 * 60), due, lastFired = null))
         assertFalse(ReminderSchedule.isMissed(due.plusSeconds(3600), due, lastFired = due.plusSeconds(5)))
         assertFalse(ReminderSchedule.isMissed(due.plusSeconds(3600), expected = null, lastFired = null))
+    }
+
+    @Test
+    fun `a due reminder that has not fired yet is still pending`() {
+        assertTrue(ReminderSchedule.isStillPending(due.plusSeconds(15 * 60), due, lastFired = due.minusSeconds(3 * 3600)))
+        assertTrue(ReminderSchedule.isStillPending(due, due, lastFired = null))
+    }
+
+    @Test
+    fun `not pending before it is due, after it fired, or once it counts as missed`() {
+        assertFalse(ReminderSchedule.isStillPending(due.minusSeconds(60), due, lastFired = null))
+        assertFalse(ReminderSchedule.isStillPending(due.plusSeconds(15 * 60), due, lastFired = due.plusSeconds(600)))
+        assertFalse(ReminderSchedule.isStillPending(due.plusSeconds(76 * 60), due, lastFired = null))
+        assertFalse(ReminderSchedule.isStillPending(due.plusSeconds(60), expected = null, lastFired = null))
     }
 }

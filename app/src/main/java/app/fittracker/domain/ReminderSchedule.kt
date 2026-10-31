@@ -29,9 +29,19 @@ object ReminderSchedule {
      * most likely the phone's battery saving killed it. The grace period covers normal delivery delay.
      */
     fun isMissed(now: Instant, expected: Instant?, lastFired: Instant?, grace: Duration = MISSED_GRACE): Boolean =
-        expected != null && now.isAfter(expected.plus(grace)) && (lastFired == null || lastFired.isBefore(expected))
+        expected != null && now.isAfter(expected.plus(grace)) && !hasFired(expected, lastFired)
 
-    val MISSED_GRACE: Duration = Duration.ofMinutes(30)
+    /**
+     * The armed reminder is due but not delivered yet, and may still arrive. Re-arming now would
+     * replace it with the next time and silently drop it, so the app must leave it alone.
+     */
+    fun isStillPending(now: Instant, expected: Instant?, lastFired: Instant?, grace: Duration = MISSED_GRACE): Boolean =
+        expected != null && !now.isBefore(expected) && !now.isAfter(expected.plus(grace)) && !hasFired(expected, lastFired)
+
+    private fun hasFired(expected: Instant, lastFired: Instant?) = lastFired != null && !lastFired.isBefore(expected)
+
+    /** OxygenOS widens even exact alarms to a 1-hour delivery window, so allow a bit more than that. */
+    val MISSED_GRACE: Duration = Duration.ofMinutes(75)
 
     private val WEEKEND = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 }

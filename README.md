@@ -48,6 +48,6 @@ If a reminder ever fails to arrive, the Today screen says so.
 
 ## Notes
 
-- Reminders use exact alarms (`USE_EXACT_ALARM`). On Android 16, inexact alarms got a delivery window of up to an hour. The app is sideloaded, so this permission is granted at install. A Play Store release would need a different approach.
+- Reminders use exact alarms (`USE_EXACT_ALARM`), which arrive on the minute on stock Android. OxygenOS still widens them to a 1-hour window, so on a OnePlus a reminder can arrive up to an hour late. We chose that over `setAlarmClock`, which would be on time but shows an alarm icon and a "next alarm" on the lock screen. The app never replaces a late reminder that is still on its way, and only calls it missed after 75 minutes. The app is sideloaded, so this permission is granted at install; a Play Store release would need a different approach.
 - Logs are one row per set. Goal changes are stored with the date they start, so old days are judged by the goal they had at the time.
 - Android Auto Backup covers the database; there is no manual export yet.

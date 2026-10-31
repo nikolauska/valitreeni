@@ -29,13 +29,16 @@ class ReminderScheduler(private val context: Context, private val settings: Sett
     }
 
     /**
-     * Run when the app starts: if the armed reminder's time passed long ago without the alarm firing,
-     * battery saving most likely blocked it, so remember that for the warning banner. Then re-arm.
-     * Not used after a reboot, because a phone that was off didn't "miss" anything.
+     * Run when the app starts. Leaves a due-but-undelivered reminder alone (phones may deliver it
+     * up to an hour late); flags one that never came as missed, which points at battery saving;
+     * otherwise makes sure the next reminder is armed. Not used after a reboot, because a phone
+     * that was off didn't "miss" anything.
      */
     suspend fun checkMissedAndReschedule(now: ZonedDateTime = ZonedDateTime.now()) {
         val s = settings.current()
-        if (ReminderSchedule.isMissed(now.toInstant(), s.nextReminderAt, s.lastReminderFiredAt)) {
+        val at = now.toInstant()
+        if (ReminderSchedule.isStillPending(at, s.nextReminderAt, s.lastReminderFiredAt)) return
+        if (ReminderSchedule.isMissed(at, s.nextReminderAt, s.lastReminderFiredAt)) {
             settings.setMissedReminderAt(s.nextReminderAt)
         }
         reschedule(now)
