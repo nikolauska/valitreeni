@@ -1,5 +1,6 @@
 package app.fittracker.ui
 
+import android.content.Context
 import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -30,6 +31,17 @@ fun exerciseName(exercise: Exercise): String =
 fun setAmount(exercise: Exercise, amount: Int = exercise.amountPerSet): String = when {
     exercise.unit == MoveUnit.SECONDS -> stringResource(R.string.amount_seconds, amount)
     exercise.builtIn?.perSide == true -> stringResource(R.string.amount_per_leg, amount)
+    else -> amount.toString()
+}
+
+/** Same as [exerciseName] for places outside Compose, such as notifications. */
+fun exerciseNameText(context: Context, exercise: Exercise): String =
+    exercise.builtIn?.let { context.getString(it.nameRes) } ?: exercise.customName.orEmpty()
+
+/** Same as [setAmount] for places outside Compose. */
+fun setAmountText(context: Context, exercise: Exercise, amount: Int = exercise.amountPerSet): String = when {
+    exercise.unit == MoveUnit.SECONDS -> context.getString(R.string.amount_seconds, amount)
+    exercise.builtIn?.perSide == true -> context.getString(R.string.amount_per_leg, amount)
     else -> amount.toString()
 }
 

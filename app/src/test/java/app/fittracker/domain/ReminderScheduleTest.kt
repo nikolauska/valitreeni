@@ -1,11 +1,14 @@
 package app.fittracker.domain
 
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReminderScheduleTest {
@@ -46,5 +49,20 @@ class ReminderScheduleTest {
         // In Helsinki 2027-03-28 03:00 jumps to 04:00.
         val result = ReminderSchedule.next(at("2027-03-28T01:00"), listOf(LocalTime.of(3, 30)), weekends = true)
         assertEquals(ZonedDateTime.of(LocalDateTime.parse("2027-03-28T04:30"), zone), result)
+    }
+
+    private val due = Instant.parse("2026-11-02T06:30:00Z")
+
+    @Test
+    fun `reminder is missed when its time is long past and nothing fired`() {
+        assertTrue(ReminderSchedule.isMissed(due.plusSeconds(31 * 60), due, lastFired = due.minusSeconds(3 * 3600)))
+        assertTrue(ReminderSchedule.isMissed(due.plusSeconds(31 * 60), due, lastFired = null))
+    }
+
+    @Test
+    fun `reminder is not missed within the grace period or after it fired`() {
+        assertFalse(ReminderSchedule.isMissed(due.plusSeconds(10 * 60), due, lastFired = null))
+        assertFalse(ReminderSchedule.isMissed(due.plusSeconds(3600), due, lastFired = due.plusSeconds(5)))
+        assertFalse(ReminderSchedule.isMissed(due.plusSeconds(3600), expected = null, lastFired = null))
     }
 }

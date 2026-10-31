@@ -1,6 +1,8 @@
 package app.fittracker.domain
 
 import java.time.DayOfWeek
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalTime
 import java.time.ZonedDateTime
 
@@ -21,6 +23,15 @@ object ReminderSchedule {
         }
         return null
     }
+
+    /**
+     * A reminder counts as missed when its time is well past and no alarm fired since then -
+     * most likely the phone's battery saving killed it. The grace period covers normal delivery delay.
+     */
+    fun isMissed(now: Instant, expected: Instant?, lastFired: Instant?, grace: Duration = MISSED_GRACE): Boolean =
+        expected != null && now.isAfter(expected.plus(grace)) && (lastFired == null || lastFired.isBefore(expected))
+
+    val MISSED_GRACE: Duration = Duration.ofMinutes(30)
 
     private val WEEKEND = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 }
