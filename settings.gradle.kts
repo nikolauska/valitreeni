@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "fit-tracker"
+rootProject.name = "valitreeni"
 include(":app")
