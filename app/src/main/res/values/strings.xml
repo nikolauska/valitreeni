@@ -19,14 +19,24 @@
     <string name="move_pullups">Pull-ups</string>
 
     <!-- Today -->
-    <plurals name="focus_header">
-        <item quantity="one">Today\'s focus · %1$d of %2$d moves</item>
-        <item quantity="other">Today\'s focus · %1$d of %2$d moves</item>
-    </plurals>
+    <string name="focus_title">Today\'s focus</string>
+    <string name="today_goals_label">goals</string>
+    <string name="cd_goals_met">%1$d of %2$d goals met</string>
+    <string name="hero_next_up">Next up</string>
+    <string name="hero_all_done">All goals met</string>
+    <string name="hero_well_done">Well done</string>
+    <string name="hero_round">Round %d</string>
+    <string name="empty_focus_title">Nothing in rotation</string>
+    <string name="empty_focus_text">Every move is turned off, so there is nothing to focus on today.</string>
+    <string name="empty_focus_button">Pick moves</string>
+    <string name="cd_open_tutorial">How to do %s</string>
+    <string name="cd_undo_set">%s: remove last set</string>
+    <string name="cd_add_set">%2$s: add %1$s</string>
+    <string name="cd_done">Done</string>
     <string name="others_header">Other moves</string>
     <plurals name="streak_days">
-        <item quantity="one">🔥 %d day</item>
-        <item quantity="other">🔥 %d days</item>
+        <item quantity="one">%d-day streak</item>
+        <item quantity="other">%d-day streak</item>
     </plurals>
     <string name="next_reminder">Next reminder %s</string>
     <string name="reminders_paused">Reminders are paused</string>
@@ -45,7 +55,7 @@
     <string name="amount_per_leg">%d / leg</string>
     <string name="banner_notifications_off">Notifications are off, so reminders won\'t show.</string>
     <string name="banner_turn_on">Turn on</string>
-    <string name="banner_battery">Battery saving can block reminders. Let Fit Tracker run unrestricted.</string>
+    <string name="banner_battery">Allow background use so reminders arrive on time.</string>
     <string name="banner_fix">Fix</string>
     <string name="banner_missed_reminder">The %s reminder didn\'t arrive. Battery saving probably blocked it.</string>
     <string name="banner_dismiss">OK</string>

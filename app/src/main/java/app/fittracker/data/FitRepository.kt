@@ -13,8 +13,11 @@ import app.fittracker.domain.Round
 import app.fittracker.domain.RoundBuilder
 import java.time.LocalDate
 import java.time.ZonedDateTime
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -62,6 +65,14 @@ class FitRepository(
     private val focusLock = Mutex()
 
     fun today(): LocalDate = now().toLocalDate()
+
+    /** Today's date, re-checked every 30 s so open screens roll over to the new day at midnight. */
+    fun observeToday(): Flow<LocalDate> = flow {
+        while (true) {
+            emit(today())
+            delay(30_000)
+        }
+    }.distinctUntilChanged()
 
     /** Goal that applies to the move on [date], also for moves that are turned off. */
     suspend fun goal(exerciseId: Long, date: LocalDate): Int =

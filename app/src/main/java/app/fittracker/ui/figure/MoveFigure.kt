@@ -37,6 +37,8 @@ fun MoveFigure(
     modifier: Modifier = Modifier,
     animate: Boolean = true,
     color: Color = LocalContentColor.current,
+    /** Brand "spark" in the head; the face dot takes it when the pose has one. */
+    accent: Color? = null,
 ) {
     val context = LocalContext.current
     val animationsOn = remember {
@@ -59,7 +61,7 @@ fun MoveFigure(
             .semantics { contentDescription?.let { this.contentDescription = it } },
     ) {
         val blend = progress?.let { blendFor(pose, it) } ?: 1f
-        drawPose(pose, blend, color)
+        drawPose(pose, blend, color, accent)
     }
 }
 
@@ -79,12 +81,12 @@ private fun smooth(x: Float) = x * x * (3f - 2f * x)
 
 private fun lerp(a: Offset, b: Offset, f: Float) = Offset(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f)
 
-private fun DrawScope.drawPose(pose: Pose, blend: Float, color: Color) {
+private fun DrawScope.drawPose(pose: Pose, blend: Float, color: Color, accent: Color?) {
     val scale = min(size.width / VIEW_W, size.height / VIEW_H)
     val dx = (size.width - VIEW_W * scale) / 2f
     val dy = (size.height - VIEW_H * scale) / 2f
     fun map(p: Offset) = Offset(dx + p.x * scale, dy + p.y * scale)
-    val body = Stroke(width = 3f * scale, cap = StrokeCap.Round)
+    val body = Stroke(width = 3.6f * scale, cap = StrokeCap.Round)
 
     fun strokeLines(points: List<Offset>, c: Color, width: Float) {
         for (i in 0 until points.size - 1) {
@@ -101,5 +103,9 @@ private fun DrawScope.drawPose(pose: Pose, blend: Float, color: Color) {
     }
     val head = lerp(pose.headA, pose.headB, blend)
     drawCircle(color, radius = 5f * scale, center = map(head), style = body)
-    pose.face?.let { drawCircle(color, radius = 2.2f * scale, center = map(head + it)) }
+    val face = pose.face
+    when {
+        face != null -> drawCircle(accent ?: color, radius = 2.2f * scale, center = map(head + face))
+        accent != null -> drawCircle(accent, radius = 1.8f * scale, center = map(head))
+    }
 }

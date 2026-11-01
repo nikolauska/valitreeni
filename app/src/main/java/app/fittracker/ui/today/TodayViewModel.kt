@@ -9,11 +9,9 @@ import app.fittracker.domain.Streak
 import java.time.Instant
 import java.time.LocalDate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -36,15 +34,7 @@ private const val STREAK_LOOKBACK_DAYS = 400L
 class TodayViewModel(private val app: FitApp) : ViewModel() {
     private val repo = app.repository
 
-    // Re-checked every 30 s so the screen rolls over to a new day at midnight while it is open.
-    private val date = flow {
-        while (true) {
-            emit(repo.today())
-            delay(30_000)
-        }
-    }.distinctUntilChanged()
-
-    val state: StateFlow<TodayUiState?> = date.flatMapLatest { day ->
+    val state: StateFlow<TodayUiState?> = repo.observeToday().flatMapLatest { day ->
         flow {
             repo.ensureFocus(day)
             emitAll(

@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +31,7 @@ import app.fittracker.ui.round.RoundScreen
 import app.fittracker.ui.settings.EditExerciseScreen
 import app.fittracker.ui.settings.NEW_EXERCISE_ID
 import app.fittracker.ui.settings.SettingsScreen
+import app.fittracker.ui.theme.brand
 import app.fittracker.ui.today.TodayScreen
 import app.fittracker.ui.tutorial.TutorialScreen
 
@@ -66,6 +69,11 @@ fun AppNav(openRoundRequest: Int, onRoundRequestHandled: () -> Unit) {
             onRoundRequestHandled()
         }
     }
+    fun openTab(route: String) = nav.navigate(route) {
+        popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
     Scaffold(
         // Each screen has its own Scaffold for the status bar; this one only makes room for the bottom bar.
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -76,15 +84,14 @@ fun AppNav(openRoundRequest: Int, onRoundRequestHandled: () -> Unit) {
                     tabs.forEach { tab ->
                         NavigationBarItem(
                             selected = currentRoute == tab.route,
-                            onClick = {
-                                nav.navigate(tab.route) {
-                                    popUpTo(nav.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
+                            onClick = { openTab(tab.route) },
                             icon = { Icon(painterResource(tab.icon), contentDescription = null) },
                             label = { Text(stringResource(tab.label)) },
+                            // The selected tab wears the brand accent, like the one main action on each screen.
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.brand.accent,
+                                selectedIconColor = MaterialTheme.brand.onAccent,
+                            ),
                         )
                     }
                 }
@@ -96,6 +103,7 @@ fun AppNav(openRoundRequest: Int, onRoundRequestHandled: () -> Unit) {
                 TodayScreen(
                     onStartRound = { nav.navigate(Routes.ROUND) { launchSingleTop = true } },
                     onOpenTutorial = { nav.navigate(Routes.tutorial(it)) },
+                    onOpenSettings = { openTab(Routes.SETTINGS) },
                 )
             }
             composable(Routes.HISTORY) { HistoryScreen() }
