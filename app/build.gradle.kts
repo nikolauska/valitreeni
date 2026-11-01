@@ -1,6 +1,10 @@
 // One version string drives both names: versionCode must keep rising for phones to accept an update.
 val appVersion = providers.gradleProperty("valitreeni.version").get()
-val appVersionCode = appVersion.split(".").map(String::toInt).let { (major, minor, patch) -> major * 10_000 + minor * 100 + patch }
+// The app's versionCodeOf() uses the same formula to read release tags.
+val appVersionCode = appVersion.split(".").map(String::toInt).let { parts ->
+    require(parts.size == 3 && parts.all { it in 0..99 }) { "valitreeni.version must be major.minor.patch, each 0-99" }
+    parts[0] * 10_000 + parts[1] * 100 + parts[2]
+}
 
 plugins {
     alias(libs.plugins.android.application)
@@ -20,6 +24,7 @@ android {
         versionCode = appVersionCode
         versionName = appVersion
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "UPDATE_URL", "\"https://api.github.com/repos/nikolauska/valitreeni/releases/latest\"")
     }
 
     signingConfigs {
@@ -36,6 +41,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Lets the update flow be tested against a local server without publishing a release.
+            providers.gradleProperty("valitreeni.updateUrl").orNull?.let { buildConfigField("String", "UPDATE_URL", "\"$it\"") }
+        }
         release {
             // Smaller download for relatives on mobile data.
             isMinifyEnabled = true
@@ -91,6 +100,8 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    // Android's org.json is a stub in local unit tests; the real library lets release parsing be tested.
+    testImplementation(libs.org.json)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)

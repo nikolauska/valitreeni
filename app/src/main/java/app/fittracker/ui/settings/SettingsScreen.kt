@@ -21,6 +21,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -56,6 +57,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.fittracker.BuildConfig
 import app.fittracker.FitApp
 import app.fittracker.R
 import app.fittracker.ui.FitCard
@@ -65,7 +67,11 @@ import app.fittracker.ui.figure.MoveFigure
 import app.fittracker.ui.figure.Poses
 import app.fittracker.ui.setAmount
 import app.fittracker.ui.theme.brand
+import app.fittracker.ui.rememberUpdater
 import app.fittracker.ui.today.rememberSystemStatus
+import app.fittracker.ui.updateAction
+import app.fittracker.ui.updateStatusText
+import app.fittracker.update.UpdateState
 import app.fittracker.ui.totalAmount
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -137,6 +143,7 @@ fun SettingsScreen(onEditExercise: (Long) -> Unit, onAddExercise: () -> Unit) {
                     }
                 }
             }
+            item { UpdatesCard(s.settings.autoUpdateCheck, vm::setAutoUpdateCheck) }
             item {
                 FitCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
@@ -189,6 +196,32 @@ fun SettingsScreen(onEditExercise: (Long) -> Unit, onAddExercise: () -> Unit) {
                 dismissButton = { TextButton(onClick = { picking = null }) { Text(stringResource(android.R.string.cancel)) } },
                 text = { TimePicker(picker) },
             )
+        }
+    }
+}
+
+@Composable
+private fun UpdatesCard(autoCheck: Boolean, onAutoCheck: (Boolean) -> Unit) {
+    val updater = rememberUpdater()
+    val update by updater.state.collectAsStateWithLifecycle()
+    val action = updateAction(update, updater)
+    FitCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.settings_updates), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            updateStatusText(update)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            if (action != null) {
+                Button(onClick = action.run, modifier = Modifier.fillMaxWidth()) { Text(action.label) }
+            } else {
+                val idle = update is UpdateState.Idle || update is UpdateState.UpToDate
+                OutlinedButton(onClick = updater::checkNow, enabled = idle, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.settings_update_check))
+                }
+            }
+            SwitchRow(stringResource(R.string.settings_update_auto), autoCheck, onAutoCheck)
+            Text(stringResource(R.string.settings_update_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

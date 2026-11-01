@@ -37,6 +37,10 @@ class SettingsViewModel(private val app: FitApp) : ViewModel() {
 
     fun setPaused(paused: Boolean) = changeAndReschedule { store.setPaused(paused) }
 
+    fun setAutoUpdateCheck(enabled: Boolean) {
+        app.appScope.launch { store.setAutoUpdateCheck(enabled) }
+    }
+
     fun language(): AppLanguage {
         val tag = locales.applicationLocales.takeIf { !it.isEmpty }?.get(0)?.language
         return AppLanguage.entries.firstOrNull { it.tag == tag } ?: AppLanguage.SYSTEM

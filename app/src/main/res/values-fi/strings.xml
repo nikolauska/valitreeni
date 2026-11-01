@@ -165,4 +165,22 @@
     <string name="history_goal_per_day">tavoite %s / pv</string>
     <string name="cd_earlier">Aiemmat</string>
     <string name="cd_later">Myöhemmät</string>
+    <string name="update_available">Versio %1$s on saatavilla</string>
+    <string name="update_install">Päivitä</string>
+    <string name="update_permission">Salli Välitreenin asentaa omat päivityksensä</string>
+    <string name="update_allow">Salli</string>
+    <string name="update_downloading">Ladataan päivitystä… %1$d %%</string>
+    <string name="update_installing">Asennetaan päivitystä…</string>
+    <string name="update_failed_offline">Päivityksiä ei voitu tarkistaa. Tarkista verkkoyhteys.</string>
+    <string name="update_failed_download">Päivityksen lataus epäonnistui.</string>
+    <string name="update_failed_damaged">Ladattu päivitys oli vioittunut.</string>
+    <string name="update_failed_install">Päivitystä ei voitu asentaa.</string>
+    <string name="update_retry">Yritä uudelleen</string>
+    <string name="settings_updates">Päivitykset</string>
+    <string name="settings_version">Versio %1$s</string>
+    <string name="settings_update_auto">Tarkista, kun sovellus avataan</string>
+    <string name="settings_update_check">Tarkista päivitykset</string>
+    <string name="settings_update_checking">Tarkistetaan…</string>
+    <string name="settings_update_current">Sinulla on uusin versio.</string>
+    <string name="settings_update_hint">Päivitykset tulevat osoitteesta github.com/nikolauska/valitreeni. Sovellus kysyy vain uusimman version; treenitietosi eivät lähde puhelimesta.</string>
 </resources>

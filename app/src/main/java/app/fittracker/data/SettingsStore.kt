@@ -23,6 +23,8 @@ data class Settings(
     val lastReminderFiredAt: Instant?,
     /** A reminder that should have fired but didn't - most likely blocked by battery saving. */
     val missedReminderAt: Instant?,
+    /** Whether opening the app asks GitHub for a newer version; the only time the app goes online. */
+    val autoUpdateCheck: Boolean,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -35,6 +37,7 @@ class SettingsStore(private val context: Context) {
         val nextAt = longPreferencesKey("next_reminder_at")
         val firedAt = longPreferencesKey("last_reminder_fired_at")
         val missedAt = longPreferencesKey("missed_reminder_at")
+        val autoUpdate = booleanPreferencesKey("auto_update_check")
     }
 
     val settings: Flow<Settings> = context.dataStore.data.map { p ->
@@ -45,6 +48,7 @@ class SettingsStore(private val context: Context) {
             nextReminderAt = p[Keys.nextAt]?.let(Instant::ofEpochMilli),
             lastReminderFiredAt = p[Keys.firedAt]?.let(Instant::ofEpochMilli),
             missedReminderAt = p[Keys.missedAt]?.let(Instant::ofEpochMilli),
+            autoUpdateCheck = p[Keys.autoUpdate] ?: true,
         )
     }
 
@@ -55,6 +59,8 @@ class SettingsStore(private val context: Context) {
     }
 
     suspend fun setWeekends(enabled: Boolean) = context.dataStore.edit { it[Keys.weekends] = enabled }
+
+    suspend fun setAutoUpdateCheck(enabled: Boolean) = context.dataStore.edit { it[Keys.autoUpdate] = enabled }
 
     suspend fun setPaused(paused: Boolean) = context.dataStore.edit { it[Keys.paused] = paused }
 

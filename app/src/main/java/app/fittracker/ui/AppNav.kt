@@ -61,6 +61,7 @@ private val tabs = listOf(
 @Composable
 fun AppNav(openRoundRequest: Int, onRoundRequestHandled: () -> Unit) {
     val nav = rememberNavController()
+    UpdateEffects()
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
     LaunchedEffect(openRoundRequest) {

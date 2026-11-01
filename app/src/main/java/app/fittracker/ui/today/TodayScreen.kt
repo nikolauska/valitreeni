@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -74,6 +75,10 @@ import app.fittracker.ui.figure.MoveFigure
 import app.fittracker.ui.figure.Poses
 import app.fittracker.ui.formatDayLabel
 import app.fittracker.ui.formatTime
+import app.fittracker.ui.rememberUpdater
+import app.fittracker.ui.showOnToday
+import app.fittracker.ui.updateAction
+import app.fittracker.ui.updateStatusText
 import app.fittracker.ui.setAmount
 import app.fittracker.ui.theme.brand
 import app.fittracker.ui.totalAmount
@@ -282,6 +287,8 @@ private fun Nudges(state: TodayUiState, onDismissMissed: () -> Unit) {
     val locale = currentLocale()
     var askedOnce by rememberSaveable { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    val updater = rememberUpdater()
+    val update by updater.state.collectAsStateWithLifecycle()
 
     // Ask once per app start; Android itself stops showing the dialog after the user declines twice.
     LaunchedEffect(status.notificationsEnabled) {
@@ -317,23 +324,37 @@ private fun Nudges(state: TodayUiState, onDismissMissed: () -> Unit) {
                 )
             }
         }
+        if (update.showOnToday()) {
+            val action = updateAction(update, updater)
+            // Good news, not a problem: calm green instead of the amber setup hints.
+            Nudge(
+                updateStatusText(update).orEmpty(),
+                action?.label,
+                container = MaterialTheme.brand.doneContainer,
+                content = MaterialTheme.colorScheme.onSurface,
+                icon = R.drawable.ic_download,
+                onAction = { action?.run?.invoke() },
+            )
+        }
     }
 }
 
 @Composable
 private fun Nudge(
     text: String,
-    action: String,
+    action: String?,
     container: androidx.compose.ui.graphics.Color = MaterialTheme.brand.warnContainer,
     content: androidx.compose.ui.graphics.Color = MaterialTheme.brand.onWarn,
+    icon: Int = R.drawable.ic_bolt,
     onAction: () -> Unit,
 ) {
     Surface(color = container, contentColor = content, shape = RoundedCornerShape(14.dp)) {
-        Row(Modifier.padding(start = 12.dp, end = 4.dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(painterResource(R.drawable.ic_bolt), contentDescription = null, modifier = Modifier.size(18.dp))
+        // Fixed height so the strip doesn't jump when a download finishes and its button disappears.
+        Row(Modifier.heightIn(min = 52.dp).padding(start = 12.dp, end = 4.dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = onAction) { Text(action, color = content, style = MaterialTheme.typography.labelLarge) }
+            Text(text, Modifier.weight(1f).padding(end = 8.dp), style = MaterialTheme.typography.bodyMedium)
+            if (action != null) TextButton(onClick = onAction) { Text(action, color = content, style = MaterialTheme.typography.labelLarge) }
         }
     }
 }

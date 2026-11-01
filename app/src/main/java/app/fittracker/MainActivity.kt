@@ -18,6 +18,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         // Only a fresh launch counts; after a rotation the round screen is already restored.
         if (savedInstanceState == null) handleIntent(intent)
+        (application as FitApp).updater.checkOnOpen()
         setContent {
             FitTrackerTheme {
                 AppNav(openRoundRequest.intValue, onRoundRequestHandled = { openRoundRequest.intValue = 0 })

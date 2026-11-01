@@ -165,4 +165,22 @@
     <string name="history_goal_per_day">goal %s / day</string>
     <string name="cd_earlier">Earlier</string>
     <string name="cd_later">Later</string>
+    <string name="update_available">Version %1$s is available</string>
+    <string name="update_install">Update</string>
+    <string name="update_permission">Allow Välitreeni to install its own updates</string>
+    <string name="update_allow">Allow</string>
+    <string name="update_downloading">Downloading update… %1$d%%</string>
+    <string name="update_installing">Installing update…</string>
+    <string name="update_failed_offline">Couldn\'t check for updates. Check your connection.</string>
+    <string name="update_failed_download">The update download failed.</string>
+    <string name="update_failed_damaged">The downloaded update was damaged.</string>
+    <string name="update_failed_install">The update couldn\'t be installed.</string>
+    <string name="update_retry">Retry</string>
+    <string name="settings_updates">Updates</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_update_auto">Check when the app opens</string>
+    <string name="settings_update_check">Check for updates</string>
+    <string name="settings_update_checking">Checking…</string>
+    <string name="settings_update_current">You have the latest version.</string>
+    <string name="settings_update_hint">Updates come from github.com/nikolauska/valitreeni. The app only asks which version is newest; nothing about your training leaves the phone.</string>
 </resources>

@@ -6,6 +6,7 @@ import app.fittracker.data.FitRepository
 import app.fittracker.data.SettingsStore
 import app.fittracker.reminders.Notifications
 import app.fittracker.reminders.ReminderScheduler
+import app.fittracker.update.Updater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,6 +18,7 @@ class FitApp : Application() {
     val repository by lazy { FitRepository(database.dao()) }
     val settings by lazy { SettingsStore(this) }
     val scheduler by lazy { ReminderScheduler(this, settings) }
+    val updater by lazy { Updater(this, settings, appScope) }
 
     /** For work that must outlive any one screen, such as re-arming alarms after a settings change. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
