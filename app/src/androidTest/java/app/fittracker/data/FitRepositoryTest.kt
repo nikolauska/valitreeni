@@ -92,4 +92,21 @@ class FitRepositoryTest {
         assertTrue(repo.isNewMove(id, day))
         assertFalse(repo.isNewMove(id, LocalDate.of(2026, 11, 3)))
     }
+
+    @Test
+    fun turningOffAFocusMoveReplacesItToday() = runTest {
+        repo.ensureFocus(day)
+        val off = repo.day(day).focus.first().exercise
+        repo.updateExercise(off.id, off.amountPerSet, enabled = false, goal = repo.goal(off.id, day), customName = null)
+        val focus = repo.day(day).focus
+        assertEquals(4, focus.size)
+        assertFalse(focus.any { it.exercise.id == off.id })
+    }
+
+    @Test
+    fun goalOfATurnedOffMoveIsStillKnown() = runTest {
+        val pullups = repo.day(day).others.single { it.exercise.builtIn?.key == "pullups" }.exercise
+        repo.updateExercise(pullups.id, pullups.amountPerSet, enabled = false, goal = 15, customName = null)
+        assertEquals(15, repo.goal(pullups.id, day))
+    }
 }

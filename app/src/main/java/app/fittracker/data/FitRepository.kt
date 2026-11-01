@@ -129,6 +129,18 @@ class FitRepository(
         dao.insertFocus(listOf(DailyFocusEntity(date, replacement)))
     }
 
+    /**
+     * Takes a move out of [date]'s focus, putting another one in its place when there is one.
+     * Unlike [swapFocus] the move leaves even without a replacement: it was turned off or deleted.
+     */
+    private suspend fun dropFromFocus(date: LocalDate, exerciseId: Long) = focusLock.withLock {
+        val current = dao.focus(date).map { it.exerciseId }
+        if (exerciseId !in current) return@withLock
+        val replacement = FocusPicker.replacement(candidates().filter { it.exerciseId != exerciseId }, current, exerciseId)
+        dao.deleteFocus(date, exerciseId)
+        replacement?.let { dao.insertFocus(listOf(DailyFocusEntity(date, it))) }
+    }
+
     suspend fun isNewMove(exerciseId: Long, date: LocalDate): Boolean = dao.daysInFocusBefore(exerciseId, date) == 0
 
     suspend fun log(exerciseId: Long, amount: Int, source: LogSource) = logAll(listOf(exerciseId to amount), source)
@@ -158,6 +170,8 @@ class FitRepository(
         if (Goals.goalFor(id, today, dao.goalChanges().map { it.toModel() }) != goal) {
             dao.setGoal(id, goal, today)
         }
+        // "Never picked for focus" should hold today too, not only from tomorrow.
+        if (!enabled) dropFromFocus(today, id)
     }
 
     suspend fun addCustomExercise(name: String, unit: MoveUnit, area: BodyArea, amountPerSet: Int, goal: Int): Long {
