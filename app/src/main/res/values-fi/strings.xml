@@ -76,6 +76,26 @@
     <string name="round_title">Minikierros</string>
     <string name="back_to_today">Takaisin tähän päivään</string>
     <string name="new_move_see_how">Uusi liike — katso ohje</string>
+    <string name="cd_close">Sulje</string>
+    <string name="round_log_all">Kirjaa kaikki</string>
+    <string name="round_checklist_title">Kirjaa kaikki kerralla</string>
+    <string name="round_skip">Ohita</string>
+    <string name="round_done">Tehty</string>
+    <string name="round_done_next">Tehty · seuraavaksi %s</string>
+    <string name="round_reps">toistoa</string>
+    <string name="round_reps_per_leg">toistoa / jalka</string>
+    <string name="round_watch">Vältä: %s</string>
+    <string name="round_timer_up">Valmis!</string>
+    <string name="round_timer_of">/ %d s</string>
+    <string name="round_timer_start">Käynnistä ajastin</string>
+    <string name="round_timer_pause">Tauko</string>
+    <string name="round_timer_resume">Jatka</string>
+    <string name="round_timer_again">Uudelleen</string>
+    <string name="round_finished_title">Kierros tehty</string>
+    <plurals name="round_finished_sets">
+        <item quantity="one">%d sarja kirjattu</item>
+        <item quantity="other">%d sarjaa kirjattu</item>
+    </plurals>
     <plurals name="log_sets">
         <item quantity="one">Kirjaa %d sarja</item>
         <item quantity="other">Kirjaa %d sarjaa</item>

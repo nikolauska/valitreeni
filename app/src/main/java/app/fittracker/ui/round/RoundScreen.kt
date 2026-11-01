@@ -2,145 +2,361 @@
 
 package app.fittracker.ui.round
 
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.VibratorManager
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.fittracker.FitApp
 import app.fittracker.R
-import app.fittracker.data.DayView
-import app.fittracker.domain.LogSource
-import app.fittracker.reminders.Notifications
+import app.fittracker.domain.MoveUnit
 import app.fittracker.ui.BackButton
+import app.fittracker.ui.FitCard
+import app.fittracker.ui.currentLocale
 import app.fittracker.ui.exerciseName
 import app.fittracker.ui.figure.MoveFigure
 import app.fittracker.ui.figure.Poses
 import app.fittracker.ui.setAmount
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-
-data class RoundUiState(val day: DayView, val newMoves: Set<Long>)
-
-@OptIn(ExperimentalCoroutinesApi::class)
-class RoundViewModel(private val app: FitApp) : ViewModel() {
-    private val repo = app.repository
-
-    val state: StateFlow<RoundUiState?> = flow {
-        val today = repo.today()
-        repo.ensureFocus(today)
-        emitAll(
-            repo.observeDay(today).map { day ->
-                RoundUiState(day, day.round.items.map { it.exerciseId }.filter { repo.isNewMove(it, today) }.toSet())
-            },
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
-    fun log(sets: List<Pair<Long, Int>>, onDone: () -> Unit) = viewModelScope.launch {
-        repo.logAll(sets, LogSource.APP)
-        // The round is done from the app, so the reminder for it is no longer needed.
-        Notifications.cancelRound(app)
-        onDone()
-    }
-}
+import app.fittracker.ui.theme.brand
+import kotlinx.coroutines.delay
 
 @Composable
 fun RoundScreen(onBack: () -> Unit, onOpenTutorial: (Long) -> Unit) {
     val app = LocalContext.current.applicationContext as FitApp
     val vm: RoundViewModel = viewModel { RoundViewModel(app) }
-    val state by vm.state.collectAsStateWithLifecycle()
-    // Moves the user unticked because they skipped them this round; everything else counts as done.
-    val skipped = remember { mutableStateMapOf<Long, Boolean>() }
+    val plan by vm.plan.collectAsStateWithLifecycle()
+    var checklist by rememberSaveable { mutableStateOf(false) }
 
+    // The phone lies on the floor during a round; it must not dim and lock between moves.
+    val view = LocalView.current
+    DisposableEffect(view) {
+        view.keepScreenOn = true
+        onDispose { view.keepScreenOn = false }
+    }
+
+    val p = plan ?: return
+    when {
+        p.sets.isEmpty() -> AllDone(onBack)
+        checklist -> Checklist(p, p.sets.drop(vm.index), vm.saving, onBack = { checklist = false }, onLog = { vm.logAll(it, onBack) })
+        vm.index >= p.sets.size -> Finished(vm.logged, onBack)
+        else -> Guided(p, vm.index, onClose = onBack, onLogAll = { checklist = true }, onDone = vm::done, onSkip = vm::skip, onOpenTutorial = onOpenTutorial)
+    }
+}
+
+@Composable
+private fun Guided(
+    plan: RoundPlan,
+    index: Int,
+    onClose: () -> Unit,
+    onLogAll: () -> Unit,
+    onDone: () -> Unit,
+    onSkip: () -> Unit,
+    onOpenTutorial: (Long) -> Unit,
+) {
+    val set = plan.sets[index]
+    val e = set.exercise
+    val brand = MaterialTheme.brand
+    val next = plan.sets.getOrNull(index + 1)?.let { exerciseName(it.exercise) }
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.round_title)) }, navigationIcon = { BackButton(onBack) }) },
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = onClose) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.cd_close)) }
+                },
+                title = { ProgressDots(plan.sets.size, index) },
+                actions = { TextButton(onClick = onLogAll) { Text(stringResource(R.string.round_log_all)) } },
+            )
+        },
     ) { padding ->
-        val s = state ?: return@Scaffold
-        val round = s.day.round
-        val byId = s.day.focus.associateBy { it.exercise.id }
-        if (round.isEmpty) {
-            Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(stringResource(R.string.all_focus_done), style = MaterialTheme.typography.titleLarge)
-                Button(onClick = onBack) { Text(stringResource(R.string.back_to_today)) }
+        Column(
+            Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(Modifier.padding(horizontal = 4.dp)) {
+                Text(
+                    stringResource(R.string.notif_round_summary, plan.roundNumber, plan.totalRounds).uppercase(currentLocale()) +
+                        "  ·  ${index + 1} / ${plan.sets.size}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(exerciseName(e), style = MaterialTheme.typography.displaySmall)
             }
-            return@Scaffold
+            FitCard(Modifier.fillMaxWidth().weight(1f)) {
+                Column(
+                    Modifier.fillMaxSize().padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+                ) {
+                    MoveFigure(
+                        Poses.forKey(e.builtIn?.key),
+                        contentDescription = exerciseName(e),
+                        modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
+                            .background(brand.track, RoundedCornerShape(16.dp)).padding(12.dp),
+                        color = brand.figure,
+                        accent = brand.accent,
+                    )
+                    if (e.unit == MoveUnit.SECONDS) {
+                        HoldTimer(seconds = set.amount, key = index)
+                    } else {
+                        Text(set.amount.toString(), style = MaterialTheme.typography.displayLarge)
+                        Text(
+                            if (e.builtIn?.perSide == true) stringResource(R.string.round_reps_per_leg) else stringResource(R.string.round_reps),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Tip(set, onOpenTutorial)
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onSkip, modifier = Modifier.height(56.dp)) { Text(stringResource(R.string.round_skip)) }
+                Button(
+                    onClick = onDone,
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = brand.accent, contentColor = brand.onAccent),
+                ) {
+                    Text(
+                        if (next != null) stringResource(R.string.round_done_next, next) else stringResource(R.string.round_done),
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                    )
+                }
+            }
         }
-        val selected = round.items.filter { skipped[it.exerciseId] != true }
+    }
+}
+
+@Composable
+private fun ProgressDots(count: Int, current: Int) {
+    val brand = MaterialTheme.brand
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        repeat(count) { i ->
+            val color = when {
+                i < current -> MaterialTheme.colorScheme.primary
+                i == current -> brand.accent
+                else -> brand.track
+            }
+            Box(Modifier.width(24.dp).height(6.dp).background(color, CircleShape))
+        }
+    }
+}
+
+/** One line from the tutorial's "avoid" list: the most common form mistake, right where it matters. */
+@Composable
+private fun Tip(set: PlannedSet, onOpenTutorial: (Long) -> Unit) {
+    val tip = set.exercise.builtIn?.tutorial?.let { stringArrayResource(it.avoid).firstOrNull() }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (tip != null) {
+            Text(
+                stringResource(R.string.round_watch, tip),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+        }
+        TextButton(onClick = { onOpenTutorial(set.exercise.id) }) {
+            Text(stringResource(if (set.isNew) R.string.new_move_see_how else R.string.tutorial_how_to))
+        }
+    }
+}
+
+@Composable
+private fun HoldTimer(seconds: Int, key: Int) {
+    val context = LocalContext.current
+    val brand = MaterialTheme.brand
+    var remaining by rememberSaveable(key) { mutableIntStateOf(seconds) }
+    var running by rememberSaveable(key) { mutableStateOf(false) }
+    LaunchedEffect(running, key) {
+        while (running && remaining > 0) {
+            delay(1_000)
+            remaining--
+        }
+        if (running && remaining == 0) {
+            running = false
+            buzz(context)
+        }
+    }
+    Box(Modifier.size(170.dp), contentAlignment = Alignment.Center) {
+        val track = brand.track
+        val fill = MaterialTheme.colorScheme.primary
+        Canvas(Modifier.fillMaxSize()) {
+            val stroke = 10.dp.toPx()
+            val arc = Size(size.width - stroke, size.height - stroke)
+            val style = Stroke(stroke, cap = StrokeCap.Round)
+            drawArc(track, 0f, 360f, false, Offset(stroke / 2, stroke / 2), arc, style = style)
+            val fraction = remaining.toFloat() / seconds.coerceAtLeast(1)
+            if (fraction > 0f) drawArc(fill, -90f, 360f * fraction, false, Offset(stroke / 2, stroke / 2), arc, style = style)
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                if (remaining == 0) stringResource(R.string.round_timer_up) else "%d:%02d".format(remaining / 60, remaining % 60),
+                style = MaterialTheme.typography.displayMedium,
+                // Announced once a second would be noise; TalkBack users hear only the end.
+                modifier = Modifier.semantics { if (remaining == 0) liveRegion = LiveRegionMode.Polite },
+            )
+            Text(stringResource(R.string.round_timer_of, seconds), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+    FilledTonalButton(onClick = {
+        if (remaining == 0) {
+            remaining = seconds
+            running = true
+        } else {
+            running = !running
+        }
+    }) {
+        Text(
+            stringResource(
+                when {
+                    remaining == 0 -> R.string.round_timer_again
+                    running -> R.string.round_timer_pause
+                    remaining < seconds -> R.string.round_timer_resume
+                    else -> R.string.round_timer_start
+                },
+            ),
+        )
+    }
+}
+
+/** Short double buzz: the hold is over, and the user isn't looking at the screen. */
+private fun buzz(context: Context) {
+    val vibrator = context.getSystemService(VibratorManager::class.java)?.defaultVibrator ?: return
+    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 180, 120, 180), -1))
+}
+
+@Composable
+private fun Finished(logged: Int, onBack: () -> Unit) {
+    val brand = MaterialTheme.brand
+    Scaffold { padding ->
+        Column(
+            Modifier.fillMaxSize().padding(padding).padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        ) {
+            Box(Modifier.size(88.dp).background(brand.done, CircleShape), contentAlignment = Alignment.Center) {
+                Icon(painterResource(R.drawable.ic_check), contentDescription = null, tint = MaterialTheme.colorScheme.surface, modifier = Modifier.size(48.dp))
+            }
+            Text(stringResource(R.string.round_finished_title), style = MaterialTheme.typography.headlineLarge)
+            Text(
+                pluralStringResource(R.plurals.round_finished_sets, logged, logged),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Button(onClick = onBack, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(stringResource(R.string.back_to_today)) }
+        }
+    }
+}
+
+@Composable
+private fun AllDone(onBack: () -> Unit) {
+    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.round_title)) }, navigationIcon = { BackButton(onBack) }) }) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(stringResource(R.string.all_focus_done), style = MaterialTheme.typography.titleLarge)
+            Button(onClick = onBack) { Text(stringResource(R.string.back_to_today)) }
+        }
+    }
+}
+
+/** For a round done without the phone: tick off what was done and log it in one go. */
+@Composable
+private fun Checklist(plan: RoundPlan, remaining: List<PlannedSet>, saving: Boolean, onBack: () -> Unit, onLog: (List<PlannedSet>) -> Unit) {
+    // Moves the user unticked because they skipped them; everything else counts as done.
+    val skipped = remember { mutableStateMapOf<Long, Boolean>() }
+    val selected = remaining.filter { skipped[it.exercise.id] != true }
+    Scaffold(
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.round_checklist_title)) }, navigationIcon = { BackButton(onBack) }) },
+    ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
                 Text(
-                    stringResource(R.string.notif_round_summary, round.roundNumber, round.totalRounds) + " · " +
-                        stringResource(R.string.about_minutes, round.estimatedMinutes),
+                    stringResource(R.string.notif_round_summary, plan.roundNumber, plan.totalRounds) + " · " +
+                        stringResource(R.string.about_minutes, plan.estimatedMinutes),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            items(round.items, key = { it.exerciseId }) { item ->
-                val progress = byId[item.exerciseId] ?: return@items
-                val checked = skipped[item.exerciseId] != true
-                Card(Modifier.fillMaxWidth()) {
+            items(remaining, key = { it.exercise.id }) { set ->
+                val checked = skipped[set.exercise.id] != true
+                FitCard(Modifier.fillMaxWidth()) {
                     Row(
-                        Modifier
-                            .toggleable(checked, role = Role.Checkbox) { skipped[item.exerciseId] = !it }
-                            .padding(12.dp),
+                        Modifier.toggleable(checked, role = Role.Checkbox) { skipped[set.exercise.id] = !it }.padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         MoveFigure(
-                            Poses.forKey(progress.exercise.builtIn?.key),
+                            Poses.forKey(set.exercise.builtIn?.key),
                             contentDescription = null,
-                            modifier = Modifier.width(96.dp),
-                            color = MaterialTheme.colorScheme.primary,
+                            animate = false,
+                            modifier = Modifier.width(72.dp),
+                            color = MaterialTheme.brand.figure,
                         )
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
-                            Text(exerciseName(progress.exercise), style = MaterialTheme.typography.titleMedium)
-                            Text(setAmount(progress.exercise, item.amount), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
-                            if (item.exerciseId in s.newMoves) {
-                                TextButton(onClick = { onOpenTutorial(item.exerciseId) }, contentPadding = PaddingValues(0.dp)) {
-                                    Text(stringResource(R.string.new_move_see_how))
-                                }
-                            }
+                            Text(exerciseName(set.exercise), style = MaterialTheme.typography.titleMedium)
+                            Text(setAmount(set.exercise, set.amount), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
                         }
                         Checkbox(checked = checked, onCheckedChange = null)
                     }
@@ -148,11 +364,12 @@ fun RoundScreen(onBack: () -> Unit, onOpenTutorial: (Long) -> Unit) {
             }
             item {
                 Button(
-                    onClick = { vm.log(selected.map { it.exerciseId to it.amount }, onBack) },
-                    enabled = selected.isNotEmpty(),
-                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onLog(selected) },
+                    // Disabled while saving: a second tap used to log the whole round twice.
+                    enabled = selected.isNotEmpty() && !saving,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
                 ) {
-                    Text(pluralStringResource(R.plurals.log_sets, selected.size, selected.size))
+                    Text(pluralStringResource(R.plurals.log_sets, selected.size, selected.size), textAlign = TextAlign.Center)
                 }
             }
         }

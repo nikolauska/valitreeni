@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <!-- Lets the app ask directly to be exempt from battery optimisation, which keeps reminder alarms alive. -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- A short buzz when a timed hold ends, because the user is on the floor, not watching the screen. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".FitApp"

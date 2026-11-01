@@ -76,6 +76,26 @@
     <string name="round_title">Mini round</string>
     <string name="back_to_today">Back to Today</string>
     <string name="new_move_see_how">New move — see how</string>
+    <string name="cd_close">Close</string>
+    <string name="round_log_all">Log all</string>
+    <string name="round_checklist_title">Log all at once</string>
+    <string name="round_skip">Skip</string>
+    <string name="round_done">Done</string>
+    <string name="round_done_next">Done · next: %s</string>
+    <string name="round_reps">reps</string>
+    <string name="round_reps_per_leg">reps per leg</string>
+    <string name="round_watch">Avoid: %s</string>
+    <string name="round_timer_up">Time!</string>
+    <string name="round_timer_of">of %d s</string>
+    <string name="round_timer_start">Start timer</string>
+    <string name="round_timer_pause">Pause</string>
+    <string name="round_timer_resume">Resume</string>
+    <string name="round_timer_again">Again</string>
+    <string name="round_finished_title">Round done</string>
+    <plurals name="round_finished_sets">
+        <item quantity="one">%d set logged</item>
+        <item quantity="other">%d sets logged</item>
+    </plurals>
     <plurals name="log_sets">
         <item quantity="one">Log %d set</item>
         <item quantity="other">Log %d sets</item>
