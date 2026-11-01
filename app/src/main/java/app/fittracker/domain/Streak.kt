@@ -31,4 +31,21 @@ object Streak {
         }
         return count
     }
+
+    /** Longest run of goal days anywhere in [days]; at least the current streak. */
+    fun best(days: Map<LocalDate, FocusDay>, today: LocalDate): Int {
+        var best = 0
+        var run = 0
+        var previous: LocalDate? = null
+        for (date in days.keys.filter { !it.isAfter(today) }.sorted()) {
+            if (status(days[date]) != DayStatus.ALL_GOALS) {
+                run = 0
+            } else {
+                run = if (previous != null && date == previous.plusDays(1) && run > 0) run + 1 else 1
+                best = maxOf(best, run)
+            }
+            previous = date
+        }
+        return maxOf(best, length(days, today))
+    }
 }

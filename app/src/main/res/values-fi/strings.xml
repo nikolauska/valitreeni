@@ -146,12 +146,18 @@
 
     <!-- History -->
     <string name="history_title">Historia</string>
-    <plurals name="history_streak">
-        <item quantity="one">tavoitepäivä putkeen</item>
-        <item quantity="other">tavoitepäivää putkeen</item>
-    </plurals>
-    <string name="history_week">Viimeiset 7 päivää</string>
-    <string name="history_week_total">%1$s: %2$s tällä viikolla</string>
+    <string name="history_week_total">näinä 7 päivänä</string>
     <string name="history_goal_days">Tavoitepäivät</string>
-    <string name="history_legend">Täysi = kaikki fokustavoitteet tehty · vaalea = osa tehty · tyhjä = ei mitään</string>
+    <string name="history_streak_label">Putki</string>
+    <string name="history_best_label">Paras</string>
+    <plurals name="history_days_unit">
+        <item quantity="one">päivä</item>
+        <item quantity="other">päivää</item>
+    </plurals>
+    <string name="history_legend_all">Kaikki tavoitteet</string>
+    <string name="history_legend_some">Osa</string>
+    <string name="history_legend_none">Ei mitään</string>
+    <string name="history_goal_per_day">tavoite %s / pv</string>
+    <string name="cd_earlier">Aiemmat</string>
+    <string name="cd_later">Myöhemmät</string>
 </resources>

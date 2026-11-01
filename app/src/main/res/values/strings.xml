@@ -146,12 +146,18 @@
 
     <!-- History -->
     <string name="history_title">History</string>
-    <plurals name="history_streak">
-        <item quantity="one">goal day in a row</item>
-        <item quantity="other">goal days in a row</item>
-    </plurals>
-    <string name="history_week">Last 7 days</string>
-    <string name="history_week_total">%1$s: %2$s this week</string>
+    <string name="history_week_total">in these 7 days</string>
     <string name="history_goal_days">Goal days</string>
-    <string name="history_legend">Full = all focus goals met · light = some done · blank = none</string>
+    <string name="history_streak_label">Streak</string>
+    <string name="history_best_label">Best</string>
+    <plurals name="history_days_unit">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <string name="history_legend_all">All goals</string>
+    <string name="history_legend_some">Some</string>
+    <string name="history_legend_none">None</string>
+    <string name="history_goal_per_day">goal %s / day</string>
+    <string name="cd_earlier">Earlier</string>
+    <string name="cd_later">Later</string>
 </resources>

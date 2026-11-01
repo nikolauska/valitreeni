@@ -1,47 +1,51 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package app.fittracker.ui.history
 
 import android.text.format.DateFormat
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -54,34 +58,45 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.fittracker.FitApp
 import app.fittracker.R
-import app.fittracker.data.Exercise
 import app.fittracker.data.HistoryData
 import app.fittracker.domain.DayStatus
 import app.fittracker.domain.Goals
 import app.fittracker.domain.Streak
+import app.fittracker.ui.FitCard
 import app.fittracker.ui.currentLocale
 import app.fittracker.ui.exerciseName
+import app.fittracker.ui.theme.brand
 import app.fittracker.ui.totalAmount
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
+import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-/** Loaded once for the screen; a year and a bit covers the calendar's back-navigation and long streaks. */
+/** Loaded once for the screen; a year and a bit covers paging back and long streaks. */
 private const val HISTORY_DAYS = 400L
 
-data class HistoryUiState(val today: LocalDate, val data: HistoryData, val streak: Int)
+/** Five weeks fit on one screen and always show the last month's worth, whatever the date. */
+private const val GRID_WEEKS = 5L
 
+data class HistoryUiState(val today: LocalDate, val data: HistoryData, val streak: Int, val best: Int)
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModel(app: FitApp) : ViewModel() {
-    private val today = app.repository.today()
-    val state: StateFlow<HistoryUiState?> = app.repository.observeHistory(today.minusDays(HISTORY_DAYS), today)
-        .map { HistoryUiState(today, it, Streak.length(it.days, today)) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    private val repo = app.repository
+
+    // Follows the date like Today does, so a screen left open overnight isn't a day behind.
+    val state: StateFlow<HistoryUiState?> = repo.observeToday().flatMapLatest { today ->
+        repo.observeHistory(today.minusDays(HISTORY_DAYS), today).map {
+            HistoryUiState(today, it, Streak.length(it.days, today), Streak.best(it.days, today))
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 }
 
 @Composable
@@ -90,59 +105,176 @@ fun HistoryScreen() {
     val vm: HistoryViewModel = viewModel { HistoryViewModel(app) }
     val state by vm.state.collectAsStateWithLifecycle()
 
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.history_title)) }) }) { padding ->
+    Scaffold { padding ->
         val s = state ?: return@Scaffold
         LazyColumn(
             Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { StreakCard(s.streak) }
+            item {
+                Text(
+                    stringResource(R.string.history_title),
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp),
+                )
+            }
+            item { StreakCard(s.streak, s.best) }
+            item { GoalGrid(s) }
             item { WeekChart(s) }
-            item { MonthCalendar(s) }
         }
     }
 }
 
 @Composable
-private fun StreakCard(streak: Int) {
-    Card(Modifier.fillMaxWidth()) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("🔥 $streak", style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.primary)
+private fun StreakCard(streak: Int, best: Int) {
+    val brand = MaterialTheme.brand
+    Surface(color = brand.hero, contentColor = brand.onHero, shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(18.dp)) {
+            StreakNumber(stringResource(R.string.history_streak_label), streak, Modifier.weight(1f))
+            StreakNumber(stringResource(R.string.history_best_label), best, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun StreakNumber(label: String, days: Int, modifier: Modifier) {
+    val brand = MaterialTheme.brand
+    Column(modifier) {
+        Text(label.uppercase(currentLocale()), style = MaterialTheme.typography.labelMedium, color = brand.onHero.copy(alpha = 0.7f))
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(days.toString(), style = MaterialTheme.typography.displaySmall)
+            Spacer(Modifier.width(6.dp))
             Text(
-                pluralStringResource(R.plurals.history_streak, streak),
-                Modifier.padding(start = 16.dp),
-                style = MaterialTheme.typography.bodyLarge,
+                pluralStringResource(R.plurals.history_days_unit, days),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 4.dp),
             )
         }
     }
 }
 
 @Composable
+private fun GoalGrid(s: HistoryUiState) {
+    val locale = currentLocale()
+    val brand = MaterialTheme.brand
+    // Pages are counted back from today rather than stored as dates, so midnight moves them along.
+    var page by rememberSaveable { mutableIntStateOf(0) }
+    val firstDay = WeekFields.of(locale).firstDayOfWeek
+    val end = s.today.minusWeeks(GRID_WEEKS * page)
+    val start = end.with(TemporalAdjusters.previousOrSame(firstDay)).minusWeeks(GRID_WEEKS - 1)
+    val days = (0 until GRID_WEEKS * 7).map { start.plusDays(it) }
+    val canGoBack = start.minusWeeks(GRID_WEEKS) >= s.today.minusDays(HISTORY_DAYS)
+    val full = MaterialTheme.colorScheme.primary
+    val some = full.copy(alpha = 0.3f).compositeOver(brand.track)
+    val dayFormat = shortDate(locale)
+
+    FitCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            NavRow(
+                title = stringResource(R.string.history_goal_days),
+                label = dayFormat.format(start) + " – " + dayFormat.format(minOf(start.plusDays(GRID_WEEKS * 7 - 1), s.today)),
+                onPrev = if (canGoBack) ({ page++ }) else null,
+                onNext = if (page > 0) ({ page-- }) else null,
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                (0L until 7L).forEach {
+                    Text(
+                        firstDay.plus(it).getDisplayName(TextStyle.NARROW, locale),
+                        Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            days.chunked(7).forEach { week ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    week.forEach { date ->
+                        val status = Streak.status(s.data.days[date])
+                        val future = date > s.today
+                        val bg = when {
+                            future -> Color.Transparent
+                            status == DayStatus.ALL_GOALS -> full
+                            status == DayStatus.SOME -> some
+                            else -> brand.track
+                        }
+                        val shape = RoundedCornerShape(8.dp)
+                        Box(
+                            Modifier.weight(1f).aspectRatio(1f).clip(shape).background(bg)
+                                .then(if (date == s.today) Modifier.border(2.dp, brand.accent, shape) else Modifier),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (!future) {
+                                Text(
+                                    date.dayOfMonth.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (status == DayStatus.ALL_GOALS) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                LegendItem(full, stringResource(R.string.history_legend_all))
+                LegendItem(some, stringResource(R.string.history_legend_some))
+                LegendItem(brand.track, stringResource(R.string.history_legend_none))
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegendItem(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(12.dp).clip(RoundedCornerShape(3.dp)).background(color))
+        Spacer(Modifier.width(5.dp))
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
 private fun WeekChart(s: HistoryUiState) {
-    val enabled = s.data.exercises.filter { it.enabled || s.data.totals.values.any { day -> (day[it.id] ?: 0) > 0 } }
+    val shown = s.data.exercises.filter { it.enabled || s.data.totals.values.any { day -> (day[it.id] ?: 0) > 0 } }
     // Default to the move logged most recently, which is usually the one worth looking at.
     val defaultId = s.data.totals.keys.sortedDescending().firstNotNullOfOrNull { s.data.totals[it]?.keys?.firstOrNull() }
-        ?: enabled.firstOrNull()?.id ?: return
+        ?: shown.firstOrNull()?.id ?: return
     var selectedId by rememberSaveable { mutableLongStateOf(defaultId) }
-    var weekEnd by rememberSaveable { mutableStateOf(s.today) }
-    val exercise = enabled.firstOrNull { it.id == selectedId } ?: enabled.first()
+    var weeksBack by rememberSaveable { mutableIntStateOf(0) }
+    val exercise = shown.firstOrNull { it.id == selectedId } ?: shown.first()
+    val weekEnd = s.today.minusWeeks(weeksBack.toLong())
     val days = (6L downTo 0L).map { weekEnd.minusDays(it) }
     val values = days.map { s.data.totals[it]?.get(exercise.id) ?: 0 }
     val goals = days.map { Goals.goalFor(exercise.id, it, s.data.goalChanges) ?: 0 }
     val locale = currentLocale()
+    val dayFormat = shortDate(locale)
 
-    Card(Modifier.fillMaxWidth()) {
+    FitCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.history_week), style = MaterialTheme.typography.titleMedium)
+            NavRow(
+                title = exerciseName(exercise),
+                label = dayFormat.format(days.first()) + " – " + dayFormat.format(days.last()),
+                onPrev = if (weekEnd.minusWeeks(1) > s.today.minusDays(HISTORY_DAYS)) ({ weeksBack++ }) else null,
+                onNext = if (weeksBack > 0) ({ weeksBack-- }) else null,
+            )
             // One swipeable row: with 13+ moves, wrapping chips would push the chart off screen.
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                enabled.forEach { e ->
-                    FilterChip(selected = e.id == exercise.id, onClick = { selectedId = e.id }, label = { Text(exerciseName(e)) })
+                shown.forEach { e ->
+                    FilterChip(
+                        selected = e.id == exercise.id,
+                        onClick = { selectedId = e.id },
+                        label = { Text(exerciseName(e)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    )
                 }
             }
             val summary = days.zip(values).joinToString { (d, v) -> "${d.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)} $v" }
-            BarChart(values, goals, highlightLast = weekEnd == s.today, modifier = Modifier.semantics { contentDescription = summary })
+            BarChart(values, goals, highlightLast = weeksBack == 0, modifier = Modifier.semantics { contentDescription = summary })
             Row(Modifier.fillMaxWidth()) {
                 days.forEach {
                     Text(
@@ -150,21 +282,21 @@ private fun WeekChart(s: HistoryUiState) {
                         Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
-            val total = values.sum()
-            Text(
-                stringResource(R.string.history_week_total, exerciseName(exercise), totalAmount(exercise.unit, total)),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            val dayFormat = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "dM"), locale)
-            NavRow(
-                label = dayFormat.format(days.first()) + " – " + dayFormat.format(days.last()),
-                onPrev = { weekEnd = weekEnd.minusWeeks(1) },
-                onNext = if (weekEnd < s.today) ({ weekEnd = minOf(weekEnd.plusWeeks(1), s.today) }) else null,
-            )
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(totalAmount(exercise.unit, values.sum()), style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    stringResource(R.string.history_week_total) +
+                        (goals.last().takeIf { it > 0 }?.let { " · " + stringResource(R.string.history_goal_per_day, totalAmount(exercise.unit, it)) } ?: ""),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 2.dp),
+                )
+            }
         }
     }
 }
@@ -179,91 +311,40 @@ private fun BarChart(values: List<Int>, goals: List<Int>, highlightLast: Boolean
         val slot = size.width / values.size
         val barWidth = slot * 0.6f
         val dash = PathEffect.dashPathEffect(floatArrayOf(6f, 6f))
+        val radius = CornerRadius(5.dp.toPx())
         values.forEachIndexed { i, v ->
             val left = i * slot + (slot - barWidth) / 2f
             val h = size.height * v / max
             // Today's bar is lighter: the day isn't over yet.
-            val color = if (highlightLast && i == values.lastIndex) bar.copy(alpha = 0.45f) else bar
-            if (v > 0) drawRect(color, Offset(left, size.height - h), Size(barWidth, h))
+            val color = if (highlightLast && i == values.lastIndex) bar.copy(alpha = 0.4f) else bar
+            if (v > 0) drawRoundRect(color, Offset(left, size.height - h), Size(barWidth, h + radius.y), radius)
             val g = goals[i]
             if (g > 0) {
                 val y = size.height - size.height * g / max
                 drawLine(goalColor, Offset(i * slot, y), Offset((i + 1) * slot, y), strokeWidth = 2f, pathEffect = dash)
             }
         }
-        drawLine(axis, Offset(0f, size.height), Offset(size.width, size.height), strokeWidth = 2f)
+        // Drawn last so it also hides the bars' rounded bottoms, leaving only their tops rounded.
+        drawRect(axis, Offset(0f, size.height - 1f), Size(size.width, 2f))
     }
 }
 
+/** Title on the left, the shown date range with paging arrows on the right. */
 @Composable
-private fun MonthCalendar(s: HistoryUiState) {
-    val locale = currentLocale()
-    var month by rememberSaveable { mutableStateOf(YearMonth.from(s.today)) }
-    val firstDay = WeekFields.of(locale).firstDayOfWeek
-    val first = month.atDay(1)
-    val leading = (first.dayOfWeek.value - firstDay.value + 7) % 7
-    val cells: List<LocalDate?> = List(leading) { null } + (1..month.lengthOfMonth()).map { month.atDay(it) }
-    val full = MaterialTheme.colorScheme.primary
-    // Plain surface stands out from the card, so days with nothing logged are still visible as cells.
-    val empty = MaterialTheme.colorScheme.surface
-
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.history_goal_days), style = MaterialTheme.typography.titleMedium)
-            NavRow(
-                label = month.month.getDisplayName(TextStyle.FULL_STANDALONE, locale).replaceFirstChar { it.titlecase(locale) } + " " + month.year,
-                onPrev = { month = month.minusMonths(1) },
-                onNext = if (month < YearMonth.from(s.today)) ({ month = month.plusMonths(1) }) else null,
-            )
-            Row(Modifier.fillMaxWidth()) {
-                (0L until 7L).forEach {
-                    Text(
-                        firstDay.plus(it).getDisplayName(TextStyle.NARROW, locale),
-                        Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-            }
-            cells.chunked(7).forEach { week ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    (0 until 7).forEach { i ->
-                        val date = week.getOrNull(i)
-                        Box(Modifier.weight(1f).aspectRatio(1f), contentAlignment = Alignment.Center) {
-                            if (date != null) {
-                                val status = Streak.status(s.data.days[date])
-                                val bg = when {
-                                    date > s.today -> Color.Transparent
-                                    status == DayStatus.ALL_GOALS -> full
-                                    status == DayStatus.SOME -> full.copy(alpha = 0.35f)
-                                    else -> empty
-                                }
-                                Box(
-                                    Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg)
-                                        .then(if (date == s.today) Modifier.border(2.dp, full, RoundedCornerShape(6.dp)) else Modifier),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        date.dayOfMonth.toString(),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = if (status == DayStatus.ALL_GOALS && date <= s.today) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            Text(stringResource(R.string.history_legend), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun NavRow(title: String, label: String, onPrev: (() -> Unit)?, onNext: (() -> Unit)?) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        IconButton(onClick = { onPrev?.invoke() }, enabled = onPrev != null) {
+            Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = stringResource(R.string.cd_earlier))
+        }
+        IconButton(onClick = { onNext?.invoke() }, enabled = onNext != null) {
+            Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = stringResource(R.string.cd_later))
         }
     }
 }
 
-@Composable
-private fun NavRow(label: String, onPrev: () -> Unit, onNext: (() -> Unit)?) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = onPrev) { Text("‹", style = MaterialTheme.typography.titleLarge) }
-        Text(label, Modifier.weight(1f), textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
-        TextButton(onClick = { onNext?.invoke() }, enabled = onNext != null) { Text("›", style = MaterialTheme.typography.titleLarge) }
-    }
-}
+private fun shortDate(locale: java.util.Locale): DateTimeFormatter =
+    DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "dMMM"), locale)
