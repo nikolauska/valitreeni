@@ -33,10 +33,12 @@ import app.fittracker.FitApp
 import app.fittracker.R
 import app.fittracker.data.Exercise
 import app.fittracker.ui.BackButton
+import app.fittracker.ui.FitCard
 import app.fittracker.ui.exerciseName
 import app.fittracker.ui.figure.MoveFigure
 import app.fittracker.ui.figure.Poses
 import app.fittracker.ui.setAmount
+import app.fittracker.ui.theme.brand
 
 @Composable
 fun TutorialScreen(exerciseId: Long, onBack: () -> Unit) {
@@ -54,12 +56,13 @@ fun TutorialScreen(exerciseId: Long, onBack: () -> Unit) {
             Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Card(Modifier.fillMaxWidth()) {
+            FitCard(Modifier.fillMaxWidth()) {
                 MoveFigure(
                     Poses.forKey(e.builtIn?.key),
                     contentDescription = exerciseName(e),
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.brand.figure,
+                    accent = MaterialTheme.brand.accent,
                 )
             }
             Text(stringResource(R.string.tutorial_one_set, setAmount(e)), style = MaterialTheme.typography.titleMedium)
