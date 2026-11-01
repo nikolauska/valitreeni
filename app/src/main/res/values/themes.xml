@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Platform theme is enough: all UI is Compose, so no AppCompat/Material Components dependency. -->
-    <style name="Theme.FitTracker" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Platform theme is enough: all UI is Compose, so no AppCompat/Material Components dependency.
+         DayNight so the first frame and splash follow the phone's dark mode instead of flashing white. -->
+    <style name="Theme.FitTracker" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/window_background</item>
+        <!-- Brand pine in both modes, so the splash matches the launcher icon. -->
+        <item name="android:windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+    </style>
 </resources>
