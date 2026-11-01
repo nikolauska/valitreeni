@@ -15,6 +15,10 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +64,7 @@ fun EditExerciseScreen(exerciseId: Long, onDone: () -> Unit) {
     var amount by rememberSaveable { mutableStateOf("10") }
     var goal by rememberSaveable { mutableStateOf("30") }
     var enabled by rememberSaveable { mutableStateOf(true) }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(exerciseId) {
         if (loaded) return@LaunchedEffect
@@ -141,7 +146,33 @@ fun EditExerciseScreen(exerciseId: Long, onDone: () -> Unit) {
                     }
                 },
             ) { Text(stringResource(R.string.edit_save)) }
+            if (!isNew && builtInName == null) {
+                OutlinedButton(
+                    onClick = { confirmDelete = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.edit_delete)) }
+            }
         }
+    }
+
+    if (confirmDelete) {
+        // Confirmed, not undoable: deleting also removes every set logged for the move.
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.edit_delete_title, name.trim())) },
+            text = { Text(stringResource(R.string.edit_delete_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    scope.launch {
+                        app.repository.deleteExercise(exerciseId)
+                        onDone()
+                    }
+                }) { Text(stringResource(R.string.edit_delete), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(android.R.string.cancel)) } },
+        )
     }
 }
 

@@ -139,6 +139,9 @@
     <string name="edit_enabled_hint">Pois päältä ollessaan liikettä ei valita päivän fokukseen.</string>
     <string name="edit_goal_note">Uusi tavoite on voimassa tästä päivästä alkaen. Menneet päivät säilyttävät silloisen tavoitteensa.</string>
     <string name="edit_save">Tallenna</string>
+    <string name="edit_delete">Poista liike</string>
+    <string name="edit_delete_title">Poistetaanko %s?</string>
+    <string name="edit_delete_text">Myös kaikki sille kirjatut sarjat poistuvat. Tätä ei voi perua.</string>
     <string name="area_push">Työntö</string>
     <string name="area_pull">Veto</string>
     <string name="area_legs">Jalat</string>

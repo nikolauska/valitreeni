@@ -139,6 +139,9 @@
     <string name="edit_enabled_hint">When off, the move is never picked for daily focus.</string>
     <string name="edit_goal_note">A new goal applies from today. Past days keep the goal they had.</string>
     <string name="edit_save">Save</string>
+    <string name="edit_delete">Delete move</string>
+    <string name="edit_delete_title">Delete %s?</string>
+    <string name="edit_delete_text">This also deletes every set logged for it. It can\'t be undone.</string>
     <string name="area_push">Push</string>
     <string name="area_pull">Pull</string>
     <string name="area_legs">Legs</string>

@@ -185,6 +185,14 @@ class FitRepository(
         if (!enabled) dropFromFocus(today, id)
     }
 
+    /** Only for the user's own moves; built-in ones can be turned off instead. */
+    suspend fun deleteExercise(id: Long) {
+        if (dao.exercise(id)?.builtinKey != null) return
+        // Replace it in today's focus first, so today keeps a full set of focus moves.
+        dropFromFocus(today(), id)
+        dao.deleteExercise(id)
+    }
+
     suspend fun addCustomExercise(name: String, unit: MoveUnit, area: BodyArea, amountPerSet: Int, goal: Int): Long {
         val id = dao.insertExercise(
             ExerciseEntity(

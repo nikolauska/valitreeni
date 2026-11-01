@@ -3,7 +3,9 @@ package app.fittracker.data
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.fittracker.domain.BodyArea
 import app.fittracker.domain.LogSource
+import app.fittracker.domain.MoveUnit
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -13,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -108,5 +111,21 @@ class FitRepositoryTest {
         val pullups = repo.day(day).others.single { it.exercise.builtIn?.key == "pullups" }.exercise
         repo.updateExercise(pullups.id, pullups.amountPerSet, enabled = false, goal = 15, customName = null)
         assertEquals(15, repo.goal(pullups.id, day))
+    }
+
+    @Test
+    fun deletingAnOwnMoveRemovesItsLogs() = runTest {
+        val id = repo.addCustomExercise("Jumping jacks", MoveUnit.REPS, BodyArea.CARDIO, 20, 60)
+        repo.log(id, 20, LogSource.APP)
+        repo.deleteExercise(id)
+        assertNull(repo.exercise(id))
+        assertFalse(repo.day(day).others.any { it.exercise.id == id })
+    }
+
+    @Test
+    fun builtInMovesCannotBeDeleted() = runTest {
+        val pushups = repo.day(day).others.single { it.exercise.builtIn?.key == "pushups" }.exercise
+        repo.deleteExercise(pushups.id)
+        assertEquals(pushups.id, repo.exercise(pushups.id)?.id)
     }
 }

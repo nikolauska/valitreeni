@@ -26,6 +26,10 @@ interface FitDao {
     @Update
     suspend fun updateExercise(exercise: ExerciseEntity)
 
+    /** Foreign keys cascade, so this also removes the move's logs, focus days and goal history. */
+    @Query("DELETE FROM exercise WHERE id = :id")
+    suspend fun deleteExercise(id: Long)
+
     @Query("SELECT COALESCE(MAX(sortOrder), 0) FROM exercise")
     suspend fun maxSortOrder(): Int
 
