@@ -31,6 +31,8 @@ class SettingsViewModel(private val app: FitApp) : ViewModel() {
 
     fun removeTime(time: LocalTime) = updateTimes { it - time }
 
+    fun replaceTime(old: LocalTime, new: LocalTime) = updateTimes { (it - old + new).distinct() }
+
     fun setWeekends(enabled: Boolean) = changeAndReschedule { store.setWeekends(enabled) }
 
     fun setPaused(paused: Boolean) = changeAndReschedule { store.setPaused(paused) }
