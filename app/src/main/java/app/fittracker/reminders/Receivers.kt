@@ -51,9 +51,17 @@ class ReminderActionReceiver : BroadcastReceiver() {
         Notifications.cancelRound(context)
         when (intent.action) {
             ACTION_DONE_ROUND -> {
-                val ids = intent.getLongArrayExtra(EXTRA_IDS) ?: return
-                val amounts = intent.getIntArrayExtra(EXTRA_AMOUNTS) ?: return
-                runAsync { app.repository.logAll(ids.zip(amounts.toList()), LogSource.NOTIFICATION) }
+                val day = intent.getLongExtra(EXTRA_DAY, Long.MIN_VALUE)
+                runAsync {
+                    val repo = app.repository
+                    val today = repo.today()
+                    // Yesterday's reminder tapped after midnight must not count toward the new day.
+                    if (day != today.toEpochDay()) return@runAsync
+                    // Rebuilt now rather than when the reminder fired: sets added in the app since
+                    // then would otherwise be logged a second time.
+                    val round = repo.day(today).round
+                    repo.logAll(round.items.map { it.exerciseId to it.amount }, LogSource.NOTIFICATION)
+                }
             }
             ACTION_SNOOZE -> app.scheduler.snooze()
             ACTION_SKIP -> Unit
@@ -64,8 +72,7 @@ class ReminderActionReceiver : BroadcastReceiver() {
         const val ACTION_DONE_ROUND = "app.fittracker.DONE_ROUND"
         const val ACTION_SNOOZE = "app.fittracker.SNOOZE"
         const val ACTION_SKIP = "app.fittracker.SKIP"
-        const val EXTRA_IDS = "ids"
-        const val EXTRA_AMOUNTS = "amounts"
+        const val EXTRA_DAY = "day"
     }
 }
 

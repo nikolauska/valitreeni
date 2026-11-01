@@ -40,6 +40,7 @@ object Notifications {
         }
         val title = context.getString(
             R.string.notif_round_title,
+            round.roundNumber,
             res.getQuantityString(R.plurals.round_moves, round.items.size, round.items.size),
             round.estimatedMinutes,
         )
@@ -49,6 +50,7 @@ object Notifications {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_move)
+            .setColor(ContextCompat.getColor(context, R.color.brand_accent))
             .setContentTitle(title)
             .setContentText(lines.joinToString(" · "))
             .setStyle(style)
@@ -59,9 +61,9 @@ object Notifications {
             .addAction(
                 0,
                 context.getString(R.string.notif_done_round),
+                // Only the day travels with the button; the sets are worked out when it is tapped.
                 actionIntent(context, ReminderActionReceiver.ACTION_DONE_ROUND, 10) {
-                    putExtra(ReminderActionReceiver.EXTRA_IDS, round.items.map { it.exerciseId }.toLongArray())
-                    putExtra(ReminderActionReceiver.EXTRA_AMOUNTS, round.items.map { it.amount }.toIntArray())
+                    putExtra(ReminderActionReceiver.EXTRA_DAY, day.date.toEpochDay())
                 },
             )
             .addAction(0, context.getString(R.string.notif_snooze, ReminderScheduler.SNOOZE_MINUTES), actionIntent(context, ReminderActionReceiver.ACTION_SNOOZE, 11))

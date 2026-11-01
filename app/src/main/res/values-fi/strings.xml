@@ -53,7 +53,7 @@
     <!-- Reminders -->
     <string name="notif_channel_name">Liikuntamuistutukset</string>
     <string name="notif_channel_description">Muistutukset tehdä minikierros päivän fokusliikkeistä</string>
-    <string name="notif_round_title">Minikierros · %1$s · ~%2$d min</string>
+    <string name="notif_round_title">Kierros %1$d · %2$s · ~%3$d min</string>
     <string name="notif_round_line">%1$s · %2$s</string>
     <!-- Round numbers are positions (3 of 4), not counts, so no plural form is needed. -->
     <string name="notif_round_summary" tools:ignore="PluralsCandidate">Kierros %1$d/%2$d tänään</string>

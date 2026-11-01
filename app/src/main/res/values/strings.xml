@@ -53,7 +53,7 @@
     <!-- Reminders -->
     <string name="notif_channel_name">Exercise reminders</string>
     <string name="notif_channel_description">Reminders to do a mini round of today\'s focus moves</string>
-    <string name="notif_round_title">Mini round · %1$s · ~%2$d min</string>
+    <string name="notif_round_title">Round %1$d · %2$s · ~%3$d min</string>
     <string name="notif_round_line">%1$s · %2$s</string>
     <!-- Round numbers are positions (3 of 4), not counts, so no plural form is needed. -->
     <string name="notif_round_summary" tools:ignore="PluralsCandidate">Round %1$d of %2$d today</string>
