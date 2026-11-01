@@ -1,81 +1,65 @@
 # Välitreeni
 
-A personal Android app that reminds you to do short bodyweight workouts at home and counts what you did today. The name is Finnish for "in-between workout", which is what the mini rounds are.
+**Small workouts that fit between everything else.**
 
-- **Daily focus:** each day the app picks 4 of the moves (oldest first, one per body area), so all of them come around every few days.
-- **Mini rounds:** at each reminder time a notification asks for one set of every focus move that is still short of its goal. "Done round" logs them all with one tap. In the app the round goes one move at a time, with a countdown for timed moves.
-- **History:** current and best streak of goal days, a 7-day chart per move and a five-week goal-day grid.
-- **Tutorials:** every built-in move has an animated stick figure, steps, common mistakes and easier/harder versions.
-- **Languages:** English and Finnish. Follows the phone's language or can be set per app.
+Välitreeni (Finnish for "in-between workout") is an Android app for doing bodyweight exercises at home in short bursts across the day, instead of finding an hour for the gym. A few times a day it reminds you to do one quick round, a set of each of today's moves. That takes two or three minutes, and by the evening the day's goals are done.
 
-Your training data stays on the phone: no account, no sync. The app only goes online to check GitHub for a newer version and download it (see [Updates](#updates)); that can be turned off in Settings.
+<p align="center">
+  <img src="docs/screenshots/today.webp" width="240" alt="Today screen: a dark green card with 1 of 4 goals done, a 9-day streak and a Start round button, above today's four moves with their progress">
+  &nbsp;
+  <img src="docs/screenshots/round.webp" width="240" alt="Round screen: pike push-ups with a stick-figure animation, 8 reps, and Skip and Done buttons">
+  &nbsp;
+  <img src="docs/screenshots/history.webp" width="240" alt="History screen: current and best streak, and a five-week calendar of goal days">
+</p>
 
-## Build
+## How it works
 
-Needs the Android SDK (platform 37) and JDK 21. The app runs on Android 15 and newer. Gradle finds JDK 21 by itself (`gradle/gradle-daemon-jvm.properties`), even if your default Java is newer.
+**Four moves a day.** Each day Välitreeni picks four of its 13 moves: push-ups, squats, plank, glute bridges, burpees and more. It takes one from each body area and starts with the ones you haven't done for longest, so everything comes around every few days and nothing gets left out.
 
-Tell Gradle where the SDK is, once:
+**Reminders do the planning.** At the times you choose, a notification lists the round: one set of every move that's still short of today's goal. Do them on the spot and tap **Done round**. You don't even need to open the app. If now is a bad time, snooze it.
 
-```sh
-echo "sdk.dir=$HOME/Android/Sdk" > local.properties
-```
+<p align="center">
+  <img src="docs/screenshots/notification.webp" width="480" alt="Notification: Round 1, 3 moves, about 2 minutes. Pike push-ups 8, hollow body hold 20 s, burpees 8, with Done round, Snooze 15 min and Skip buttons">
+</p>
 
-Then:
+**Or go one move at a time.** In the app, **Start round** walks you through the round with a big animated figure for each move, a countdown for holds like the plank, and a buzz when time is up.
 
-```sh
-./gradlew assembleDebug            # APK in app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest        # logic tests, no device needed
-./gradlew connectedDebugAndroidTest  # database tests, needs a running emulator or phone
-./gradlew lintDebug                # also fails on any string missing its Finnish translation
-```
+**Learn the moves.** Every move has a tutorial with steps, common mistakes, and easier and harder versions, so you can start gently and make it harder as you get stronger.
 
-## Install
+**Keep the streak.** A day counts when every goal is met. History shows your current and best streak, five weeks of goal days, and a weekly chart for each move.
 
-**For relatives (or any phone):** open the latest release at https://github.com/nikolauska/valitreeni/releases/latest on the phone, download the `.apk`, and open it. Android asks to allow installing from the browser once. After that the app keeps itself up to date.
+<p align="center">
+  <img src="docs/screenshots/tutorial.webp" width="240" alt="Tutorial for pike push-ups: animated figure, how-to steps, mistakes to avoid, and easier and harder versions">
+  &nbsp;
+  <img src="docs/screenshots/today-dark.webp" width="240" alt="Today screen in dark mode">
+</p>
 
-**During development:** turn on Developer options and **USB debugging** on the phone, connect it, and run `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
+### Also
 
-## Updates
+- Your own moves, goals and set sizes, and you can turn off moves you don't want.
+- English and Finnish.
+- Light and dark mode.
+- Your training stays on your phone: no account, no ads, no tracking. The app goes online only to check this page for a newer version, and you can turn that off.
+- Updates itself. When a new version is out, the Today screen offers it, and one tap installs it.
 
-When the app opens, it asks GitHub for the newest release of this repo. If it's newer, the Today screen shows **Update**. The app downloads the APK, checks it against GitHub's SHA-256, and hands it to Android's installer. The first time, Android asks to allow Välitreeni to install apps, and to confirm the update. Later updates install without asking. Settings has **Check for updates** and a switch to stop the automatic check.
+## Get it
 
-The check sends an ordinary request to `api.github.com`; nothing about the user or their training is sent.
+Välitreeni runs on **Android 15 or newer**. It isn't on Google Play; you install it from here.
 
-To test the flow without publishing, build debug APKs that point at a local server, e.g. `./gradlew assembleDebug -Pvalitreeni.version=0.3.0 -Pvalitreeni.updateUrl=http://127.0.0.1:8000/latest.json`, serve a `latest.json` shaped like GitHub's release answer, and run `adb reverse tcp:8000 tcp:8000`. Only debug builds accept this override and plain http.
+1. On your phone, open **[the latest release](https://github.com/nikolauska/valitreeni/releases/latest)** and tap the `.apk` file to download it.
+2. Open the downloaded file. Android asks you to allow installing apps from your browser. Allow it, go back, and tap **Install**.
+3. Open Välitreeni and allow notifications, so the reminders can reach you.
 
-## Releasing
+From then on the app updates itself. The first time it does, Android asks you to allow Välitreeni to install updates.
 
-```sh
-scripts/release.sh 0.3.0 "What changed"
-```
+### Make sure reminders arrive
 
-The script raises `valitreeni.version` in `gradle.properties`, commits, tags `v0.3.0` and pushes. The **Release** workflow then tests, builds and signs the APK, checks the signature, and publishes the GitHub release. Phones get it the next time the app opens. The version must go up every time, because `versionCode` is derived from it and Android refuses an update with a lower one.
+Some phones, OnePlus, Xiaomi and Samsung among them, stop apps in the background to save battery, and reminders then quietly stop coming. If the Today screen shows a yellow strip about background use, tap **Fix** and allow it. On a OnePlus, also open **Settings** in the app, tap the battery chip next to **Reminders**, then **Battery**, and choose **Unrestricted**.
 
-### Signing key
+If a reminder ever doesn't arrive, the Today screen tells you.
 
-Every APK, debug or release, must be signed with the same key, or phones refuse the update and the only way out is uninstalling, which deletes the data.
+## Contributing
 
-- Locally the key is `~/.config/valitreeni/release.jks`, with its password in `~/.gradle/gradle.properties` (`valitreeni.storeFile`, `valitreeni.storePassword`, `valitreeni.keyAlias`). Debug builds on this machine use `~/.android/debug.keystore`, which holds the same key.
-- The workflow reads it from the repo secrets `VALITREENI_KEYSTORE_BASE64` (the `.jks` file, base64) and `VALITREENI_STORE_PASSWORD`.
-- Certificate SHA-256: `d604326dee1286e824eb86b4e76b86d1f0810c988fa4e860f9e41f80f90bbbde`. The workflow refuses to publish an APK signed with anything else.
+Build instructions, tests and how releases are made are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Keep a backup of the `.jks` file and its password somewhere safe, such as a password manager. It can't be recovered from GitHub.
-
-## First start on a OnePlus
-
-OnePlus battery saving stops background apps aggressively. If it isn't turned off for this app, reminders silently stop.
-
-1. Allow notifications when asked.
-2. Tap **Fix** on the battery strip on the Today screen, then **Allow**.
-3. Also open **Settings**, tap the battery chip next to **Reminders**, then **Battery**, and choose **Unrestricted** / allow background activity.
-
-If a reminder ever fails to arrive, the Today screen says so.
-
-## Notes
-
-- The app was called Fit Tracker before. Its package ID is still `app.fittracker`, so new builds install as an update over the old app and keep its data. The repo was renamed from `fit-tracker` to `valitreeni`.
-- The heading font is Bricolage Grotesque, bundled under the SIL Open Font License (`licenses/BricolageGrotesque-OFL.txt`).
-
-- Reminders use exact alarms (`USE_EXACT_ALARM`), which arrive on the minute on stock Android. OxygenOS still widens them to a 1-hour window, so on a OnePlus a reminder can arrive up to an hour late. We chose that over `setAlarmClock`, which would be on time but shows an alarm icon and a "next alarm" on the lock screen. The app never replaces a late reminder that is still on its way, and only calls it missed after 75 minutes. The app is sideloaded, so this permission is granted at install; a Play Store release would need a different approach.
-- Logs are one row per set. Goal changes are stored with the date they start, so old days are judged by the goal they had at the time.
-- Android Auto Backup covers the database; there is no manual export yet.
+The heading font is [Bricolage Grotesque](https://github.com/ateliertriay/bricolage), used under the SIL Open Font License (`licenses/BricolageGrotesque-OFL.txt`).
