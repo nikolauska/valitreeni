@@ -12,7 +12,7 @@ Everything stays on the phone: no account, no network.
 
 ## Build
 
-Needs the Android SDK (platform 37) and JDK 21. Gradle finds JDK 21 by itself (`gradle/gradle-daemon-jvm.properties`), even if your default Java is newer.
+Needs the Android SDK (platform 37) and JDK 21. The app runs on Android 15 and newer. Gradle finds JDK 21 by itself (`gradle/gradle-daemon-jvm.properties`), even if your default Java is newer.
 
 Tell Gradle where the SDK is, once:
 

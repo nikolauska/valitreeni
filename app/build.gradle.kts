@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId = "app.fittracker"
-        // Only target device is a OnePlus 13 on Android 16; supporting older versions would only add compat code.
-        minSdk = 36
+        // Android 15 is the oldest phone it runs on; going lower would only add compat code.
+        minSdk = 35
         targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
