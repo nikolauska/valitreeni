@@ -1,0 +1,77 @@
+# Builds and publishes a release when scripts/release.sh pushes a version tag.
+# Installed apps read the newest release from here, so only a correctly signed APK may be published.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.ref_name }}
+      # The key every installed copy was signed with; phones refuse an update signed with any other.
+      EXPECTED_CERT: d604326dee1286e824eb86b4e76b86d1f0810c988fa4e860f9e41f80f90bbbde
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches the app version
+        run: |
+          version=$(sed -n 's/^valitreeni.version=//p' gradle.properties)
+          [[ "$TAG" == "v$version" ]] || { echo "::error::Tag $TAG but gradle.properties says $version"; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Restore the signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.VALITREENI_KEYSTORE_BASE64 }}
+        run: |
+          [[ -n "$KEYSTORE_BASE64" ]] || { echo "::error::Secret VALITREENI_KEYSTORE_BASE64 is missing"; exit 1; }
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: Test and build
+        env:
+          STORE_PASSWORD: ${{ secrets.VALITREENI_STORE_PASSWORD }}
+        run: >
+          ./gradlew testDebugUnitTest assembleRelease
+          -Pvalitreeni.storeFile="$RUNNER_TEMP/release.jks"
+          -Pvalitreeni.storePassword="$STORE_PASSWORD"
+          -Pvalitreeni.keyAlias=valitreeni
+
+      - name: Check the signature
+        run: |
+          apk=app/build/outputs/apk/release/app-release.apk
+          build_tools=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          cert=$("$build_tools/apksigner" verify --print-certs "$apk" | sed -n 's/.*certificate SHA-256 digest: //p' | head -1)
+          [[ "$cert" == "$EXPECTED_CERT" ]] || { echo "::error::APK signed with '$cert', not the release key"; exit 1; }
+          cp "$apk" "valitreeni-$VERSION.apk"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # checkout gives a lightweight copy of the tag; fetch the annotated one to read its message.
+          git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
+          notes=$(git for-each-ref "refs/tags/$TAG" --format='%(contents)')
+          if [[ -z "$notes" || "$notes" == "Välitreeni $VERSION" ]]; then
+            gh release create "$TAG" "valitreeni-$VERSION.apk" --title "Välitreeni $VERSION" --generate-notes
+          else
+            gh release create "$TAG" "valitreeni-$VERSION.apk" --title "Välitreeni $VERSION" --notes "$notes"
+          fi
+      - name: Remove the signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
