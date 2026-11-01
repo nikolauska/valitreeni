@@ -63,6 +63,10 @@ class FitRepository(
 
     fun today(): LocalDate = now().toLocalDate()
 
+    /** Goal that applies to the move on [date], also for moves that are turned off. */
+    suspend fun goal(exerciseId: Long, date: LocalDate): Int =
+        Goals.goalFor(exerciseId, date, dao.goalChanges().map { it.toModel() }) ?: 0
+
     fun observeExercises(): Flow<List<Exercise>> = dao.observeExercises().map { list -> list.map { it.toModel() } }
 
     suspend fun exercise(id: Long): Exercise? = dao.exercise(id)?.toModel()

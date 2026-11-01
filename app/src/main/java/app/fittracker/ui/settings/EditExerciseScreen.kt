@@ -65,13 +65,13 @@ fun EditExerciseScreen(exerciseId: Long, onDone: () -> Unit) {
         if (loaded) return@LaunchedEffect
         val repo = app.repository
         val e = repo.exercise(exerciseId) ?: return@LaunchedEffect onDone()
-        val today = repo.day(repo.today())
         builtInName = e.builtIn?.nameRes
         name = e.customName.orEmpty()
         unit = e.unit
         area = e.area
         amount = e.amountPerSet.toString()
-        goal = ((today.focus + today.others).firstOrNull { it.exercise.id == e.id }?.goal ?: 0).toString()
+        // Read from goal history, not today's list: turned-off moves are left out of that list.
+        goal = repo.goal(e.id, repo.today()).toString()
         enabled = e.enabled
         loaded = true
     }
