@@ -1,10 +1,10 @@
-# Fit Tracker
+# Välitreeni
 
-A personal Android app that reminds you to do short bodyweight workouts at home and counts what you did today.
+A personal Android app that reminds you to do short bodyweight workouts at home and counts what you did today. The name is Finnish for "in-between workout", which is what the mini rounds are.
 
 - **Daily focus:** each day the app picks 4 of the moves (oldest first, one per body area), so all of them come around every few days.
-- **Mini rounds:** at each reminder time a notification asks for one set of every focus move that is still short of its goal. "Done round" logs them all with one tap.
-- **History:** streak of goal days, a 7-day chart per move and a month calendar.
+- **Mini rounds:** at each reminder time a notification asks for one set of every focus move that is still short of its goal. "Done round" logs them all with one tap. In the app the round goes one move at a time, with a countdown for timed moves.
+- **History:** current and best streak of goal days, a 7-day chart per move and a five-week goal-day grid.
 - **Tutorials:** every built-in move has an animated stick figure, steps, common mistakes and easier/harder versions.
 - **Languages:** English and Finnish. Follows the phone's language or can be set per app.
 
@@ -41,12 +41,15 @@ The APK is signed with this machine's debug key (`~/.android/debug.keystore`). A
 OnePlus battery saving stops background apps aggressively. If it isn't turned off for this app, reminders silently stop.
 
 1. Allow notifications when asked.
-2. Tap **Fix** on the battery banner on the Today screen, then **Allow**.
-3. Also open **Settings → Open app settings → Battery** and choose **Unrestricted** / allow background activity.
+2. Tap **Fix** on the battery strip on the Today screen, then **Allow**.
+3. Also open **Settings**, tap the battery chip next to **Reminders**, then **Battery**, and choose **Unrestricted** / allow background activity.
 
 If a reminder ever fails to arrive, the Today screen says so.
 
 ## Notes
+
+- The app was called Fit Tracker before. Its package ID is still `app.fittracker`, so new builds install as an update over the old app and keep its data.
+- The heading font is Bricolage Grotesque, bundled under the SIL Open Font License (`licenses/BricolageGrotesque-OFL.txt`).
 
 - Reminders use exact alarms (`USE_EXACT_ALARM`), which arrive on the minute on stock Android. OxygenOS still widens them to a 1-hour window, so on a OnePlus a reminder can arrive up to an hour late. We chose that over `setAlarmClock`, which would be on time but shows an alarm icon and a "next alarm" on the lock screen. The app never replaces a late reminder that is still on its way, and only calls it missed after 75 minutes. The app is sideloaded, so this permission is granted at install; a Play Store release would need a different approach.
 - Logs are one row per set. Goal changes are stored with the date they start, so old days are judged by the goal they had at the time.
