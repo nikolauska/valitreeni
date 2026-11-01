@@ -22,6 +22,8 @@ Run from the repo root. They're local and safe to run anytime; fix failures your
 
 Lint fails when a string is missing from `res/values-fi/strings.xml`, so add every new user-facing string in English and Finnish. Database or repository changes also need `./gradlew connectedDebugAndroidTest`, which needs a running emulator or connected phone. For UI changes, install the debug build on an emulator and look at the changed screen; tests don't cover the UI.
 
+CI (`.github/workflows/ci.yml`) runs all of these plus an unsigned release build (R8) on every push and pull request, with the database tests on an Android 15 emulator.
+
 ## Rules that protect installed copies
 
 - **Database:** the Room schema is exported to `app/schemas/`. Any entity change needs a version bump and a migration, never a destructive fallback: the database is the user's training history.
