@@ -1,3 +1,7 @@
+// One version string drives both names: versionCode must keep rising for phones to accept an update.
+val appVersion = providers.gradleProperty("valitreeni.version").get()
+val appVersionCode = appVersion.split(".").map(String::toInt).let { (major, minor, patch) -> major * 10_000 + minor * 100 + patch }
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -13,19 +17,37 @@ android {
         // Android 15 is the oldest phone it runs on; going lower would only add compat code.
         minSdk = 35
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersion
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        // Lives in ~/.gradle/gradle.properties, never in the repo: anyone with the key could push updates to every phone.
+        val storeFile = providers.gradleProperty("valitreeni.storeFile").orNull
+        if (storeFile != null) {
+            create("release") {
+                this.storeFile = file(storeFile)
+                storePassword = providers.gradleProperty("valitreeni.storePassword").get()
+                keyAlias = providers.gradleProperty("valitreeni.keyAlias").get()
+                keyPassword = storePassword
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Smaller download for relatives on mobile data.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     androidResources {
