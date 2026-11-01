@@ -15,6 +15,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.fittracker.FitApp
+import app.fittracker.ui.start.StartLevelScreen
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,6 +67,26 @@ private val tabs = listOf(
  */
 @Composable
 fun AppNav(openRoundRequest: Int, onRoundRequestHandled: () -> Unit) {
+    val app = LocalContext.current.applicationContext as FitApp
+    // Only for phones nobody has trained on: updaters already have moves that fit them.
+    val needsStartLevel by remember {
+        combine(app.settings.settings, app.repository.observeAnyLogs()) { s, anyLogs -> s.startLevel == null && !anyLogs }
+    }.collectAsStateWithLifecycle(initialValue = null)
+    when (needsStartLevel) {
+        // Not known yet; showing Today first would flash the wrong moves.
+        null -> return
+        true -> {
+            StartLevelScreen { level ->
+                app.appScope.launch {
+                    // Settings first: a Gentle start also avoids the floor, which the new focus needs to know.
+                    app.settings.setStartLevel(level)
+                    app.repository.applyStartLevel(level)
+                }
+            }
+            return
+        }
+        false -> Unit
+    }
     val nav = rememberNavController()
     UpdateEffects()
     val backStack by nav.currentBackStackEntryAsState()

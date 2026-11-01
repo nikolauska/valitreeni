@@ -27,6 +27,7 @@ CI (`.github/workflows/ci.yml`) runs all of these plus an unsigned release build
 ## Rules that protect installed copies
 
 - **Database:** the Room schema is exported to `app/schemas/`. Any entity change needs a version bump and a migration, never a destructive fallback: the database is the user's training history.
+- **Built-in moves:** a move's `key` in `MoveCatalog` is stored on phones; never rename or remove one. Add new moves at the end of `MoveCatalog.all`: the database adds missing ones every time it opens, so updated phones get them too. Each needs a pose in `Poses.kt` and a name and tutorial in both languages.
 - **Versions:** don't edit `valitreeni.version` in `gradle.properties` by hand; `scripts/release.sh` raises it.
 - **Signing:** every build must be signed with the one release key. Never commit keystores or passwords; they live in `~/.gradle/gradle.properties` and repo secrets.
 - **Network:** the update check is the only network use, and the README promises that. Don't add analytics, accounts or other calls.

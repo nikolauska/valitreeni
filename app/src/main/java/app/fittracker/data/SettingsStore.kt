@@ -6,8 +6,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import app.fittracker.domain.StartLevel
 import java.time.Instant
 import java.time.LocalTime
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +27,10 @@ data class Settings(
     val missedReminderAt: Instant?,
     /** Whether opening the app asks GitHub for a newer version; the only time the app goes online. */
     val autoUpdateCheck: Boolean,
+    /** Answer to the first-run question; null until asked (and for people who updated from 0.2.x). */
+    val startLevel: StartLevel?,
+    /** Keeps moves that start on the floor out of focus. */
+    val avoidFloor: Boolean,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -38,6 +44,8 @@ class SettingsStore(private val context: Context) {
         val firedAt = longPreferencesKey("last_reminder_fired_at")
         val missedAt = longPreferencesKey("missed_reminder_at")
         val autoUpdate = booleanPreferencesKey("auto_update_check")
+        val startLevel = stringPreferencesKey("start_level")
+        val avoidFloor = booleanPreferencesKey("avoid_floor")
     }
 
     val settings: Flow<Settings> = context.dataStore.data.map { p ->
@@ -49,6 +57,8 @@ class SettingsStore(private val context: Context) {
             lastReminderFiredAt = p[Keys.firedAt]?.let(Instant::ofEpochMilli),
             missedReminderAt = p[Keys.missedAt]?.let(Instant::ofEpochMilli),
             autoUpdateCheck = p[Keys.autoUpdate] ?: true,
+            startLevel = p[Keys.startLevel]?.let { name -> StartLevel.entries.firstOrNull { it.name == name } },
+            avoidFloor = p[Keys.avoidFloor] ?: false,
         )
     }
 
@@ -61,6 +71,14 @@ class SettingsStore(private val context: Context) {
     suspend fun setWeekends(enabled: Boolean) = context.dataStore.edit { it[Keys.weekends] = enabled }
 
     suspend fun setAutoUpdateCheck(enabled: Boolean) = context.dataStore.edit { it[Keys.autoUpdate] = enabled }
+
+    /** Gentle starters also avoid the floor, since getting down and back up is often the hard part. */
+    suspend fun setStartLevel(level: StartLevel) = context.dataStore.edit { p ->
+        p[Keys.startLevel] = level.name
+        p[Keys.avoidFloor] = level == StartLevel.GENTLE
+    }
+
+    suspend fun setAvoidFloor(avoid: Boolean) = context.dataStore.edit { it[Keys.avoidFloor] = avoid }
 
     suspend fun setPaused(paused: Boolean) = context.dataStore.edit { it[Keys.paused] = paused }
 

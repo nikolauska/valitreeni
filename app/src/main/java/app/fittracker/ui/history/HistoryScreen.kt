@@ -237,7 +237,8 @@ private fun LegendItem(color: Color, label: String) {
 
 @Composable
 private fun WeekChart(s: HistoryUiState) {
-    val shown = s.data.exercises.filter { it.enabled || s.data.totals.values.any { day -> (day[it.id] ?: 0) > 0 } }
+    // The version in use, plus any version with sets in the loaded range, so old training stays visible.
+    val shown = s.data.exercises.filter { it.id in s.data.currentIds || s.data.totals.values.any { day -> (day[it.id] ?: 0) > 0 } }
     // Default to the move logged most recently, which is usually the one worth looking at.
     val defaultId = s.data.totals.keys.sortedDescending().firstNotNullOfOrNull { s.data.totals[it]?.keys?.firstOrNull() }
         ?: shown.firstOrNull()?.id ?: return

@@ -4,12 +4,15 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.fittracker.domain.BodyArea
+import app.fittracker.domain.Effort
+import app.fittracker.domain.StartLevel
 import app.fittracker.domain.LogSource
 import app.fittracker.domain.MoveUnit
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -26,6 +29,7 @@ class FitRepositoryTest {
     private lateinit var db: FitDatabase
     private var clock: ZonedDateTime = LocalDateTime.parse("2026-11-02T09:00").atZone(ZoneId.of("Europe/Helsinki"))
     private lateinit var repo: FitRepository
+    private val avoidFloor = MutableStateFlow(false)
     private val day get() = clock.toLocalDate()
 
     @Before
@@ -33,7 +37,7 @@ class FitRepositoryTest {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), FitDatabase::class.java)
             .addCallback(FitDatabase.seedCallback)
             .build()
-        repo = FitRepository(db.dao()) { clock }
+        repo = FitRepository(db.dao(), { clock }, avoidFloor)
     }
 
     @After
@@ -42,7 +46,7 @@ class FitRepositoryTest {
     @Test
     fun seedsAllBuiltInMovesWithGoals() = runTest {
         val view = repo.day(day)
-        assertEquals(13, view.others.size)
+        assertEquals(MoveCatalog.ladders.size, view.others.size)
         val squats = view.others.single { it.exercise.builtIn?.key == "squats" }
         assertEquals(15, squats.exercise.amountPerSet)
         assertEquals(60, squats.goal)
@@ -127,5 +131,96 @@ class FitRepositoryTest {
         val pushups = repo.day(day).others.single { it.exercise.builtIn?.key == "pushups" }.exercise
         repo.deleteExercise(pushups.id)
         assertEquals(pushups.id, repo.exercise(pushups.id)?.id)
+    }
+
+    private suspend fun builtIn(key: String) = repo.observeMoves(day).first().ladders
+        .flatMap { it.rungs }.single { it.first.builtIn?.key == key }.first
+
+    @Test
+    fun showsOneVersionPerLadder() = runTest {
+        assertEquals(MoveCatalog.ladders.size, repo.day(day).others.size)
+        assertTrue(repo.day(day).others.none { it.exercise.builtIn?.key == "wall_pushups" })
+    }
+
+    @Test
+    fun twoTooEasyDaysMakeTheMoveHarderNextMorningAndKeepSetsPerDay() = runTest {
+        val pushups = builtIn("pushups")
+        repo.log(pushups.id, 10, LogSource.APP, Effort.EASY)
+        clock = clock.plusDays(1)
+        repo.log(pushups.id, 10, LogSource.APP, Effort.EASY)
+        clock = clock.plusDays(1)
+        repo.ensureFocus(day)
+        assertEquals(12, repo.exercise(pushups.id)?.amountPerSet)
+        assertEquals(48, repo.goal(pushups.id, day))
+        assertEquals(40, repo.goal(pushups.id, day.minusDays(1)))
+        // The same two answers must not push it up again the day after.
+        clock = clock.plusDays(1)
+        repo.ensureFocus(day)
+        assertEquals(12, repo.exercise(pushups.id)?.amountPerSet)
+    }
+
+    @Test
+    fun aTooHardDayMakesTheMoveEasierNextMorning() = runTest {
+        val squats = builtIn("squats")
+        repo.log(squats.id, 15, LogSource.APP, Effort.HARD)
+        clock = clock.plusDays(1)
+        repo.ensureFocus(day)
+        assertEquals(13, repo.exercise(squats.id)?.amountPerSet)
+    }
+
+    @Test
+    fun notificationLogsNeverChangeDifficulty() = runTest {
+        val pushups = builtIn("pushups")
+        repeat(3) {
+            repo.logAll(listOf(pushups.id to 10), LogSource.NOTIFICATION)
+            clock = clock.plusDays(1)
+            repo.ensureFocus(day)
+        }
+        assertEquals(10, repo.exercise(pushups.id)?.amountPerSet)
+    }
+
+    @Test
+    fun easierVersionSwitchesNowAndReplacesTheFocusMove() = runTest {
+        repo.ensureFocus(day)
+        val push = repo.day(day).focus.map { it.exercise }.firstOrNull { it.builtIn?.ladder == "push" }
+            ?: builtIn("pushups")
+        val easier = repo.easierVersion(push.id)!!
+        assertEquals("knee_pushups", easier.builtIn?.key)
+        val switched = repo.switchToEasier(push.id, day)!!
+        assertEquals(easier.id, switched.id)
+        val focusIds = repo.day(day).focus.map { it.exercise.id }
+        assertFalse(push.id in focusIds)
+        assertEquals(repo.observeMoves(day).first().ladders.single { it.key == "push" }.currentId, easier.id)
+    }
+
+    @Test
+    fun avoidingTheFloorKeepsFloorMovesOutOfFocus() = runTest {
+        avoidFloor.value = true
+        repo.ensureFocus(day)
+        val focus = repo.day(day).focus
+        assertEquals(4, focus.size)
+        assertTrue(focus.none { it.exercise.builtIn?.floor == true })
+    }
+
+    @Test
+    fun gentleStartUsesTheEasiestVersionsAndTurnsHardSingleMovesOff() = runTest {
+        repo.applyStartLevel(StartLevel.GENTLE)
+        val ladders = repo.observeMoves(day).first().ladders.associateBy { it.key }
+        assertEquals("wall_pushups", ladders.getValue("push").current?.first?.builtIn?.key)
+        assertEquals("seated_leg_extensions", ladders.getValue("squat").current?.first?.builtIn?.key)
+        assertNull(ladders.getValue("burpees").current)
+        repo.applyStartLevel(StartLevel.STRONG)
+        assertEquals("pushups", repo.observeMoves(day).first().ladders.single { it.key == "push" }.current?.first?.builtIn?.key)
+    }
+
+    @Test
+    fun typingASetSizeTurnsAutomaticAdjustmentOff() = runTest {
+        val plank = builtIn("plank")
+        repo.updateExercise(plank.id, amountPerSet = 60, enabled = true, goal = 180, customName = null)
+        assertFalse(repo.ladderOf(plank.id)!!.autoAdjust)
+        repo.log(plank.id, 60, LogSource.APP, Effort.HARD)
+        clock = clock.plusDays(1)
+        repo.ensureFocus(day)
+        assertEquals(60, repo.exercise(plank.id)?.amountPerSet)
     }
 }

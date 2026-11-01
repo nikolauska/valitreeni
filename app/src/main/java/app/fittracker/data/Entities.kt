@@ -5,6 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import app.fittracker.domain.BodyArea
+import app.fittracker.domain.Effort
 import app.fittracker.domain.LogSource
 import app.fittracker.domain.MoveUnit
 import java.time.Instant
@@ -49,6 +50,8 @@ data class LogEntryEntity(
     /** Day in the phone's time zone at log time, so a late-night set stays on its day even after travel. */
     val localDate: LocalDate,
     val source: LogSource,
+    /** The user's "how did that feel" answer; null for logs without one, such as the notification's "Done round". */
+    val effort: Effort? = null,
 )
 
 @Entity(
@@ -61,6 +64,26 @@ data class DailyFocusEntity(
     val localDate: LocalDate,
     val exerciseId: Long,
 )
+
+/**
+ * Which version of a move the user is on, per [MoveCatalog] ladder. Kept apart from
+ * [ExerciseEntity.enabled], which stays the user's own on/off choice for each version.
+ */
+@Entity(
+    tableName = "ladder_state",
+    foreignKeys = [ForeignKey(ExerciseEntity::class, ["id"], ["exerciseId"], onDelete = ForeignKey.CASCADE)],
+    indices = [Index("exerciseId")],
+)
+data class LadderStateEntity(
+    @PrimaryKey val ladderKey: String,
+    val exerciseId: Long,
+    /** Off once the user sets the set size or goal by hand; they took control. */
+    val autoAdjust: Boolean = true,
+    /** Day of the last change; answers from before it were about the old set and are ignored. */
+    val changedOn: LocalDate,
+)
+
+data class EffortRow(val localDate: LocalDate, val effort: Effort?)
 
 data class DailyTotal(val exerciseId: Long, val localDate: LocalDate, val total: Int)
 

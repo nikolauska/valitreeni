@@ -156,4 +156,148 @@
     </string-array>
     <string name="tut_pullups_easier">Jump up, then lower yourself slowly over 3–5 s</string>
     <string name="tut_pullups_harder">Pause 2 s at the top</string>
+    <string-array name="tut_wall_pushups_steps">
+        <item>Stand an arm\'s length from a wall, feet hip-width apart.</item>
+        <item>Put your hands on the wall at shoulder height, a bit wider than your shoulders.</item>
+        <item>Keep your body straight and bend your elbows until your nose nearly touches the wall.</item>
+        <item>Push the wall away to straighten your arms.</item>
+    </string-array>
+    <string-array name="tut_wall_pushups_avoid">
+        <item>Hips sticking out behind you</item>
+        <item>Shrugging your shoulders up to your ears</item>
+    </string-array>
+    <string name="tut_wall_pushups_easier">Stand closer to the wall</string>
+    <string name="tut_wall_pushups_harder">Step your feet further back</string>
+    <string-array name="tut_incline_pushups_steps">
+        <item>Put your hands on a sturdy counter or table edge, a bit wider than your shoulders.</item>
+        <item>Walk your feet back until your body is a straight line from head to heels.</item>
+        <item>Lower your chest toward the edge, elbows about 45° from your body.</item>
+        <item>Push back up.</item>
+    </string-array>
+    <string-array name="tut_incline_pushups_avoid">
+        <item>A table or chair that can slide or tip</item>
+        <item>Hips sagging</item>
+    </string-array>
+    <string name="tut_incline_pushups_easier">Use a higher surface, like a kitchen counter</string>
+    <string name="tut_incline_pushups_harder">Use a lower surface, like a sofa seat</string>
+    <string-array name="tut_knee_pushups_steps">
+        <item>Kneel on a soft surface and put your hands on the floor, a bit wider than your shoulders.</item>
+        <item>Walk your hands forward until your body is a straight line from head to knees.</item>
+        <item>Lower your chest toward the floor, elbows about 45° from your body.</item>
+        <item>Push back up.</item>
+    </string-array>
+    <string-array name="tut_knee_pushups_avoid">
+        <item>Bending at the hips instead of keeping them in line</item>
+        <item>Elbows flaring straight out to the sides</item>
+    </string-array>
+    <string name="tut_knee_pushups_easier">Hands on a sofa or table instead</string>
+    <string name="tut_knee_pushups_harder">Do the last reps with knees off the floor</string>
+    <string-array name="tut_seated_leg_extensions_steps">
+        <item>Sit tall near the front of a sturdy chair, feet flat, hands on the seat.</item>
+        <item>Straighten one knee until the leg is out in front of you.</item>
+        <item>Pull your toes up toward you and hold for a second.</item>
+        <item>Lower slowly, then switch legs.</item>
+    </string-array>
+    <string-array name="tut_seated_leg_extensions_avoid">
+        <item>Leaning back to lift the leg</item>
+        <item>Kicking the leg up quickly</item>
+    </string-array>
+    <string name="tut_seated_leg_extensions_easier">Straighten the knee only part of the way</string>
+    <string name="tut_seated_leg_extensions_harder">Hold the straight leg for 3 seconds</string>
+    <string-array name="tut_sit_to_stand_steps">
+        <item>Sit near the front of a sturdy chair with feet flat, a bit apart.</item>
+        <item>Lean forward so your nose is over your toes.</item>
+        <item>Push through your heels and stand up all the way.</item>
+        <item>Sit back down slowly and with control.</item>
+    </string-array>
+    <string-array name="tut_sit_to_stand_avoid">
+        <item>A chair with wheels or one that can slide</item>
+        <item>Dropping down onto the seat</item>
+    </string-array>
+    <string name="tut_sit_to_stand_easier">Push off your thighs or the armrests with your hands</string>
+    <string name="tut_sit_to_stand_harder">Cross your arms over your chest</string>
+    <string-array name="tut_standing_knee_raises_steps">
+        <item>Stand tall; hold a chair back or counter if you need balance.</item>
+        <item>Tighten your stomach as if bracing for a light poke.</item>
+        <item>Lift one knee toward hip height without leaning back.</item>
+        <item>Lower with control and switch legs.</item>
+    </string-array>
+    <string-array name="tut_standing_knee_raises_avoid">
+        <item>Leaning back to get the knee higher</item>
+        <item>Holding your breath</item>
+    </string-array>
+    <string name="tut_standing_knee_raises_easier">Lift the knee only as high as feels comfortable</string>
+    <string name="tut_standing_knee_raises_harder">Pause 2 s with the knee up, no hands</string>
+    <string-array name="tut_incline_plank_steps">
+        <item>Put your forearms on a sturdy table or counter, elbows under your shoulders.</item>
+        <item>Walk your feet back until your body is a straight line from head to heels.</item>
+        <item>Tighten your stomach and squeeze your buttocks.</item>
+        <item>Hold and breathe.</item>
+    </string-array>
+    <string-array name="tut_incline_plank_avoid">
+        <item>Hips sagging toward the floor</item>
+        <item>A table that can slide or tip</item>
+    </string-array>
+    <string name="tut_incline_plank_easier">Use a higher surface, like a kitchen counter</string>
+    <string name="tut_incline_plank_harder">Use a lower surface, like a sofa seat</string>
+    <string-array name="tut_wall_angels_steps">
+        <item>Stand with your back, head and buttocks against a wall, feet a small step forward.</item>
+        <item>Raise your arms into a W: elbows bent, backs of the hands toward the wall.</item>
+        <item>Slide your arms up the wall as far as you can while keeping contact.</item>
+        <item>Slide back down to the W.</item>
+    </string-array>
+    <string-array name="tut_wall_angels_avoid">
+        <item>Arching your lower back off the wall</item>
+        <item>Forcing the arms higher than is comfortable</item>
+    </string-array>
+    <string name="tut_wall_angels_easier">Let your hands come off the wall a little</string>
+    <string name="tut_wall_angels_harder">Stand with your heels closer to the wall</string>
+    <string-array name="tut_bird_dog_steps">
+        <item>Start on hands and knees: hands under shoulders, knees under hips.</item>
+        <item>Reach one arm forward and the opposite leg back until both are level with your body.</item>
+        <item>Hold for a second without letting the hips twist.</item>
+        <item>Bring them back and switch sides.</item>
+    </string-array>
+    <string-array name="tut_bird_dog_avoid">
+        <item>Arching your back to lift the leg higher</item>
+        <item>Rushing from side to side</item>
+    </string-array>
+    <string name="tut_bird_dog_easier">Lift only the leg, or only the arm</string>
+    <string name="tut_bird_dog_harder">Hold each rep for 3 seconds</string>
+    <string-array name="tut_march_in_place_steps">
+        <item>Stand tall with feet hip-width apart.</item>
+        <item>Lift one knee, then the other, at a steady pace.</item>
+        <item>Swing your arms in time with your legs.</item>
+        <item>Keep going for the whole time.</item>
+    </string-array>
+    <string-array name="tut_march_in_place_avoid">
+        <item>Stomping hard on the floor</item>
+        <item>Holding your breath</item>
+    </string-array>
+    <string name="tut_march_in_place_easier">Lift the knees only a little, or hold a counter</string>
+    <string name="tut_march_in_place_harder">Lift the knees higher and march faster</string>
+    <string-array name="tut_step_jacks_steps">
+        <item>Stand tall, feet together, arms at your sides.</item>
+        <item>Step one foot out to the side while raising both arms overhead.</item>
+        <item>Step back in as your arms come down.</item>
+        <item>Switch sides each rep. No jumping needed.</item>
+    </string-array>
+    <string-array name="tut_step_jacks_avoid">
+        <item>Locking your knees</item>
+        <item>Swinging the arms so fast you lose balance</item>
+    </string-array>
+    <string name="tut_step_jacks_easier">Raise the arms only to shoulder height</string>
+    <string name="tut_step_jacks_harder">Move faster, or do regular jumping jacks</string>
+    <string-array name="tut_doorframe_rows_steps">
+        <item>Stand in an open doorway and grip both sides of the frame at chest height.</item>
+        <item>Walk your feet forward a little and lean back until your arms are straight.</item>
+        <item>Squeeze your shoulder blades together and pull your chest toward the frame.</item>
+        <item>Lower back slowly.</item>
+    </string-array>
+    <string-array name="tut_doorframe_rows_avoid">
+        <item>A door that can swing into you – grip the frame, not the door</item>
+        <item>Letting the hips drop</item>
+    </string-array>
+    <string name="tut_doorframe_rows_easier">Stand more upright, feet further from the frame</string>
+    <string name="tut_doorframe_rows_harder">Step your feet closer to the frame to lean back more</string>
 </resources>

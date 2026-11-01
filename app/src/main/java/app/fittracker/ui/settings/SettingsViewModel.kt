@@ -5,8 +5,9 @@ import android.os.LocaleList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.fittracker.FitApp
-import app.fittracker.data.Exercise
+import app.fittracker.data.MovesView
 import app.fittracker.data.Settings
+import app.fittracker.domain.StartLevel
 import java.time.LocalTime
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class SettingsUiState(val settings: Settings, val exercises: List<Pair<Exercise, Int>>)
+data class SettingsUiState(val settings: Settings, val moves: MovesView)
 
 /** Language choices offered in Settings; null tag means "follow the phone". */
 enum class AppLanguage(val tag: String?) { SYSTEM(null), ENGLISH("en"), FINNISH("fi") }
@@ -24,7 +25,7 @@ class SettingsViewModel(private val app: FitApp) : ViewModel() {
     private val locales = app.getSystemService(LocaleManager::class.java)
 
     val state: StateFlow<SettingsUiState?> =
-        combine(store.settings, app.repository.observeExercisesWithGoals(app.repository.today())) { s, e -> SettingsUiState(s, e) }
+        combine(store.settings, app.repository.observeMoves(app.repository.today())) { s, m -> SettingsUiState(s, m) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun addTime(time: LocalTime) = updateTimes { (it + time).distinct() }
@@ -39,6 +40,18 @@ class SettingsViewModel(private val app: FitApp) : ViewModel() {
 
     fun setAutoUpdateCheck(enabled: Boolean) {
         app.appScope.launch { store.setAutoUpdateCheck(enabled) }
+    }
+
+    fun setAvoidFloor(avoid: Boolean) {
+        app.appScope.launch { store.setAvoidFloor(avoid) }
+    }
+
+    /** Resets every move to the level's version, the same as answering the first-run question again. */
+    fun setStartLevel(level: StartLevel) {
+        app.appScope.launch {
+            store.setStartLevel(level)
+            app.repository.applyStartLevel(level)
+        }
     }
 
     fun language(): AppLanguage {

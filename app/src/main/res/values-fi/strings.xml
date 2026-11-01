@@ -17,6 +17,18 @@
     <string name="move_mountain_climbers">Vuorikiipeilijät</string>
     <string name="move_burpees">Burpeet</string>
     <string name="move_pullups">Leuanvedot</string>
+    <string name="move_wall_pushups">Seinäpunnerrukset</string>
+    <string name="move_incline_pushups">Kaltevat punnerrukset</string>
+    <string name="move_knee_pushups">Polvipunnerrukset</string>
+    <string name="move_seated_leg_extensions">Istuvat polven ojennukset</string>
+    <string name="move_sit_to_stand">Tuolilta nousut</string>
+    <string name="move_standing_knee_raises">Polvennostot seisten</string>
+    <string name="move_incline_plank">Kalteva lankku</string>
+    <string name="move_wall_angels">Seinäenkelit</string>
+    <string name="move_bird_dog">Nelinkontin ojennukset</string>
+    <string name="move_march_in_place">Marssi paikallaan</string>
+    <string name="move_step_jacks">Haara-askeleet</string>
+    <string name="move_doorframe_rows">Ovenkarmisoudut</string>
 
     <!-- Today -->
     <string name="focus_title">Päivän fokus</string>
@@ -84,6 +96,11 @@
     <string name="round_done_next">Tehty · seuraavaksi %s</string>
     <string name="round_reps">toistoa</string>
     <string name="round_reps_per_leg">toistoa / jalka</string>
+    <string name="round_effort_question">Miltä tuntui?</string>
+    <string name="round_effort_hard">Liian raskas</string>
+    <string name="round_effort_ok">Sopiva</string>
+    <string name="round_effort_easy">Liian kevyt</string>
+    <string name="round_easier_version">Kevyempi versio: %s</string>
     <string name="round_watch">Vältä: %s</string>
     <string name="round_timer_up">Valmis!</string>
     <string name="round_timer_of">/ %d s</string>
@@ -108,6 +125,18 @@
     <string name="tutorial_safety">Lopeta, jos tunnet terävää kipua. Tämä on yleistä ohjeistusta, ei lääketieteellistä neuvontaa.</string>
     <string name="tutorial_custom_move">Tämä on itse lisäämäsi liike, joten sille ei ole ohjetta.</string>
 
+    <!-- First run -->
+    <string name="start_level_title">Miten haluat aloittaa?</string>
+    <string name="start_level_intro">Välitreeni keventää tai raskauttaa liikkeitä sen mukaan, miltä sarjat tuntuvat. Tässä valitaan vain lähtötaso.</string>
+    <string name="start_level_gentle">Kevyt</string>
+    <string name="start_level_gentle_text">Liikkeitä seisten, tuolilla ja seinää vasten. Ei mitään lattialla.</string>
+    <string name="start_level_middle">Keskitaso</string>
+    <string name="start_level_middle_text">Klassisten liikkeiden kevyemmät versiot, kuten polvipunnerrukset.</string>
+    <string name="start_level_strong">Vahva</string>
+    <string name="start_level_strong_text">Klassiset liikkeet: punnerrukset, kyykyt, lankut, burpeet.</string>
+    <string name="start_level_start">Aloita</string>
+    <string name="start_level_later">Voit vaihtaa tämän myöhemmin asetuksista.</string>
+
     <!-- Settings -->
     <string name="settings_title">Asetukset</string>
     <string name="settings_reminders">Muistutukset</string>
@@ -125,6 +154,14 @@
     <string name="settings_moves">Liikkeet</string>
     <string name="settings_move_summary">%1$s / sarja · tavoite %2$s</string>
     <string name="settings_move_off">Pois päältä</string>
+    <string name="settings_difficulty">Vaikeustaso</string>
+    <string name="settings_difficulty_hint">Liikkeet kevenevät tai raskautuvat yön aikana ”Miltä tuntui?” -vastaustesi perusteella.</string>
+    <string name="settings_avoid_floor">Vältä lattialla tehtäviä liikkeitä</string>
+    <string name="settings_start_level">Lähtötaso</string>
+    <string name="settings_start_level_none">Ei valittu</string>
+    <string name="settings_start_level_reset">Tämä palauttaa jokaisen liikkeen tämän tason versioon ja sarjan kokoon.</string>
+    <string name="settings_start_level_apply">Palauta liikkeet</string>
+    <string name="settings_move_version">versio %1$d/%2$d</string>
     <string name="settings_add_move">+ Lisää oma liike</string>
     <string name="edit_new_move">Uusi liike</string>
     <string name="edit_own_move">Oma liike</string>
@@ -135,6 +172,10 @@
     <string name="edit_body_area">Kehon alue</string>
     <string name="edit_per_set">Yksi sarja (%s)</string>
     <string name="edit_daily_goal">Päivätavoite (%s)</string>
+    <string name="edit_version">Versio</string>
+    <string name="edit_version_floor">Lattialla</string>
+    <string name="edit_auto_adjust">Säädä automaattisesti</string>
+    <string name="edit_auto_adjust_hint">Muuttaa sarjan kokoa ja versiota sen mukaan, miltä sarjat tuntuivat. Oman sarjan koon tai tavoitteen kirjoittaminen kytkee tämän pois.</string>
     <string name="edit_enabled">Mukana kierrossa</string>
     <string name="edit_enabled_hint">Pois päältä ollessaan liikettä ei valita päivän fokukseen.</string>
     <string name="edit_goal_note">Uusi tavoite on voimassa tästä päivästä alkaen. Menneet päivät säilyttävät silloisen tavoitteensa.</string>

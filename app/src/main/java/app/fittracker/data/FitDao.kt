@@ -92,4 +92,26 @@ interface FitDao {
     /** Days before [date] when the move was in focus; 0 means it is new to the user. */
     @Query("SELECT COUNT(*) FROM daily_focus WHERE exerciseId = :exerciseId AND localDate < :date")
     suspend fun daysInFocusBefore(exerciseId: Long, date: LocalDate): Int
+
+    @Query("SELECT * FROM ladder_state")
+    suspend fun ladderStates(): List<LadderStateEntity>
+
+    @Query("SELECT * FROM ladder_state")
+    fun observeLadderStates(): Flow<List<LadderStateEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertLadderState(state: LadderStateEntity)
+
+    /** Answers for one move between two days (both excluded), for deciding its next step. */
+    @Query("SELECT localDate, effort FROM log_entry WHERE exerciseId = :exerciseId AND localDate > :after AND localDate < :before")
+    suspend fun efforts(exerciseId: Long, after: LocalDate, before: LocalDate): List<EffortRow>
+
+    @Query("SELECT COUNT(*) FROM log_entry WHERE exerciseId IN (:exerciseIds) AND localDate = :date")
+    suspend fun logCount(exerciseIds: List<Long>, date: LocalDate): Int
+
+    @Query("SELECT EXISTS(SELECT 1 FROM log_entry)")
+    fun observeAnyLogs(): Flow<Boolean>
+
+    @Query("DELETE FROM daily_focus WHERE localDate = :date")
+    suspend fun clearFocus(date: LocalDate)
 }

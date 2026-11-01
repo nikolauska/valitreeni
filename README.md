@@ -7,14 +7,14 @@ Välitreeni (Finnish for "in-between workout") is an Android app for doing bodyw
 <p align="center">
   <img src="docs/screenshots/today.webp" width="240" alt="Today screen: a dark green card with 1 of 4 goals done, a 9-day streak and a Start round button, above today's four moves with their progress">
   &nbsp;
-  <img src="docs/screenshots/round.webp" width="240" alt="Round screen: pike push-ups with a stick-figure animation, 8 reps, and Skip and Done buttons">
+  <img src="docs/screenshots/round.webp" width="240" alt="Round screen: push-ups with a stick-figure animation, 10 reps, a How did that feel? choice of Too hard, OK or Too easy, an Easier version: Knee push-ups link, and Skip and Done buttons">
   &nbsp;
   <img src="docs/screenshots/history.webp" width="240" alt="History screen: current and best streak, and a five-week calendar of goal days">
 </p>
 
 ## How it works
 
-**Four moves a day.** Each day Välitreeni picks four of its 13 moves: push-ups, squats, plank, glute bridges, burpees and more. It takes one from each body area and starts with the ones you haven't done for longest, so everything comes around every few days and nothing gets left out.
+**Four moves a day.** Each day Välitreeni picks four moves: push-ups, squats, plank, glute bridges, burpees and more. It takes one from each body area and starts with the ones you haven't done for longest, so everything comes around every few days and nothing gets left out.
 
 **Reminders do the planning.** At the times you choose, a notification lists the round: one set of every move that's still short of today's goal. Do them on the spot and tap **Done round**. You don't even need to open the app. If now is a bad time, snooze it.
 
@@ -24,7 +24,9 @@ Välitreeni (Finnish for "in-between workout") is an Android app for doing bodyw
 
 **Or go one move at a time.** In the app, **Start round** walks you through the round with a big animated figure for each move, a countdown for holds like the plank, and a buzz when time is up.
 
-**Learn the moves.** Every move has a tutorial with steps, common mistakes, and easier and harder versions, so you can start gently and make it harder as you get stronger.
+**Moves that fit you.** Most moves come in easier and harder versions, from wall push-ups to push-ups and from chair sit-to-stands to squats. After each set in the app, tap **Too hard**, **OK** or **Too easy**. Overnight Välitreeni adjusts the set size, and moves you to a harder or easier version when you're ready. If a move is too much right now, **Easier version** swaps it on the spot. On first launch you pick where to start: Gentle (standing, chair and wall moves, nothing on the floor), Middle or Strong. There's also a setting to avoid moves on the floor.
+
+**Learn the moves.** Every move has a tutorial with steps, common mistakes, and tips for making it easier or harder.
 
 **Keep the streak.** A day counts when every goal is met. History shows your current and best streak, five weeks of goal days, and a weekly chart for each move.
 

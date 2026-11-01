@@ -17,6 +17,18 @@
     <string name="move_mountain_climbers">Mountain climbers</string>
     <string name="move_burpees">Burpees</string>
     <string name="move_pullups">Pull-ups</string>
+    <string name="move_wall_pushups">Wall push-ups</string>
+    <string name="move_incline_pushups">Incline push-ups</string>
+    <string name="move_knee_pushups">Knee push-ups</string>
+    <string name="move_seated_leg_extensions">Seated leg extensions</string>
+    <string name="move_sit_to_stand">Sit-to-stands</string>
+    <string name="move_standing_knee_raises">Standing knee raises</string>
+    <string name="move_incline_plank">Incline plank</string>
+    <string name="move_wall_angels">Wall angels</string>
+    <string name="move_bird_dog">Bird dogs</string>
+    <string name="move_march_in_place">Marching in place</string>
+    <string name="move_step_jacks">Step jacks</string>
+    <string name="move_doorframe_rows">Doorframe rows</string>
 
     <!-- Today -->
     <string name="focus_title">Today\'s focus</string>
@@ -84,6 +96,11 @@
     <string name="round_done_next">Done · next: %s</string>
     <string name="round_reps">reps</string>
     <string name="round_reps_per_leg">reps per leg</string>
+    <string name="round_effort_question">How did that feel?</string>
+    <string name="round_effort_hard">Too hard</string>
+    <string name="round_effort_ok">OK</string>
+    <string name="round_effort_easy">Too easy</string>
+    <string name="round_easier_version">Easier version: %s</string>
     <string name="round_watch">Avoid: %s</string>
     <string name="round_timer_up">Time!</string>
     <string name="round_timer_of">of %d s</string>
@@ -108,6 +125,18 @@
     <string name="tutorial_safety">Stop if you feel sharp pain. This is general guidance, not medical advice.</string>
     <string name="tutorial_custom_move">This is a move you added yourself, so it has no tutorial.</string>
 
+    <!-- First run -->
+    <string name="start_level_title">How do you want to start?</string>
+    <string name="start_level_intro">Välitreeni makes moves easier or harder as you go, based on how each set felt. This just picks where to begin.</string>
+    <string name="start_level_gentle">Gentle</string>
+    <string name="start_level_gentle_text">Standing, chair and wall moves. Nothing on the floor.</string>
+    <string name="start_level_middle">Middle</string>
+    <string name="start_level_middle_text">Easier versions of the classic moves, like knee push-ups.</string>
+    <string name="start_level_strong">Strong</string>
+    <string name="start_level_strong_text">Classic moves: push-ups, squats, planks, burpees.</string>
+    <string name="start_level_start">Start</string>
+    <string name="start_level_later">You can change this later in Settings.</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_reminders">Reminders</string>
@@ -125,6 +154,14 @@
     <string name="settings_moves">Moves</string>
     <string name="settings_move_summary">%1$s per set · goal %2$s</string>
     <string name="settings_move_off">Off</string>
+    <string name="settings_difficulty">Difficulty</string>
+    <string name="settings_difficulty_hint">Moves get easier or harder overnight, based on your \"How did that feel?\" answers.</string>
+    <string name="settings_avoid_floor">Avoid moves on the floor</string>
+    <string name="settings_start_level">Starting level</string>
+    <string name="settings_start_level_none">Not set</string>
+    <string name="settings_start_level_reset">This puts every move back to the version and set size for this level.</string>
+    <string name="settings_start_level_apply">Reset moves</string>
+    <string name="settings_move_version">version %1$d of %2$d</string>
     <string name="settings_add_move">+ Add your own move</string>
     <string name="edit_new_move">New move</string>
     <string name="edit_own_move">Your move</string>
@@ -135,6 +172,10 @@
     <string name="edit_body_area">Body area</string>
     <string name="edit_per_set">One set (%s)</string>
     <string name="edit_daily_goal">Daily goal (%s)</string>
+    <string name="edit_version">Version</string>
+    <string name="edit_version_floor">On the floor</string>
+    <string name="edit_auto_adjust">Adjust automatically</string>
+    <string name="edit_auto_adjust_hint">Changes the set size and version based on how sets felt. Typing your own set size or goal turns this off.</string>
     <string name="edit_enabled">In rotation</string>
     <string name="edit_enabled_hint">When off, the move is never picked for daily focus.</string>
     <string name="edit_goal_note">A new goal applies from today. Past days keep the goal they had.</string>

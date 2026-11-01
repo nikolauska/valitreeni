@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -30,7 +34,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -43,9 +49,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import app.fittracker.FitApp
 import app.fittracker.R
+import app.fittracker.data.LadderView
 import app.fittracker.domain.BodyArea
 import app.fittracker.domain.MoveUnit
 import app.fittracker.ui.BackButton
+import app.fittracker.ui.exerciseName
 import kotlinx.coroutines.launch
 
 const val NEW_EXERCISE_ID = -1L
@@ -56,7 +64,10 @@ fun EditExerciseScreen(exerciseId: Long, onDone: () -> Unit) {
     val app = LocalContext.current.applicationContext as FitApp
     val scope = rememberCoroutineScope()
     val isNew = exerciseId == NEW_EXERCISE_ID
+    // Picking another version below switches the screen to that version's row.
+    var editingId by rememberSaveable { mutableLongStateOf(exerciseId) }
     var loaded by rememberSaveable { mutableStateOf(isNew) }
+    var ladder by remember { mutableStateOf<LadderView?>(null) }
     var builtInName by rememberSaveable { mutableStateOf<Int?>(null) }
     var name by rememberSaveable { mutableStateOf("") }
     var unit by rememberSaveable { mutableStateOf(MoveUnit.REPS) }
@@ -66,10 +77,13 @@ fun EditExerciseScreen(exerciseId: Long, onDone: () -> Unit) {
     var enabled by rememberSaveable { mutableStateOf(true) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(exerciseId) {
-        if (loaded) return@LaunchedEffect
+    LaunchedEffect(editingId) {
+        if (isNew) return@LaunchedEffect
         val repo = app.repository
-        val e = repo.exercise(exerciseId) ?: return@LaunchedEffect onDone()
+        // Read every time, also after rotation: the ladder can change from the version picker.
+        ladder = repo.ladderOf(editingId)
+        if (loaded) return@LaunchedEffect
+        val e = repo.exercise(editingId) ?: return@LaunchedEffect onDone()
         builtInName = e.builtIn?.nameRes
         name = e.customName.orEmpty()
         unit = e.unit
@@ -117,6 +131,30 @@ fun EditExerciseScreen(exerciseId: Long, onDone: () -> Unit) {
                     }
                 }
             }
+            ladder?.let { l ->
+                VersionPicker(l, editingId) { id ->
+                    scope.launch {
+                        app.repository.chooseVersion(id)
+                        loaded = false
+                        editingId = id
+                    }
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.toggleable(l.autoAdjust, role = Role.Switch) { on ->
+                        scope.launch {
+                            app.repository.setAutoAdjust(l.key, on)
+                            ladder = app.repository.ladderOf(editingId)
+                        }
+                    },
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.edit_auto_adjust), style = MaterialTheme.typography.bodyLarge)
+                        Text(stringResource(R.string.edit_auto_adjust_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(l.autoAdjust, onCheckedChange = null)
+                }
+            }
             val unitHint = stringResource(if (unit == MoveUnit.SECONDS) R.string.edit_unit_seconds else R.string.edit_unit_reps)
             NumberField(stringResource(R.string.edit_per_set, unitHint), amount) { amount = it }
             NumberField(stringResource(R.string.edit_daily_goal, unitHint), goal) { goal = it }
@@ -140,7 +178,7 @@ fun EditExerciseScreen(exerciseId: Long, onDone: () -> Unit) {
                         if (isNew) {
                             app.repository.addCustomExercise(name.trim(), unit, area, amountValue!!, goalValue!!)
                         } else {
-                            app.repository.updateExercise(exerciseId, amountValue!!, enabled, goalValue!!, name.trim())
+                            app.repository.updateExercise(editingId, amountValue!!, enabled, goalValue!!, name.trim())
                         }
                         onDone()
                     }
@@ -166,13 +204,39 @@ fun EditExerciseScreen(exerciseId: Long, onDone: () -> Unit) {
                 TextButton(onClick = {
                     confirmDelete = false
                     scope.launch {
-                        app.repository.deleteExercise(exerciseId)
+                        app.repository.deleteExercise(editingId)
                         onDone()
                     }
                 }) { Text(stringResource(R.string.edit_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(android.R.string.cancel)) } },
         )
+    }
+}
+
+/** Lists a ladder's versions easiest first; only shown for moves that have more than one. */
+@Composable
+private fun VersionPicker(ladder: LadderView, selectedId: Long, onPick: (Long) -> Unit) {
+    if (ladder.rungs.size < 2) return
+    Column {
+        Text(stringResource(R.string.edit_version), style = MaterialTheme.typography.labelLarge)
+        ladder.rungs.forEach { (exercise, _) ->
+            Row(
+                Modifier.fillMaxWidth().selectable(exercise.id == selectedId, role = Role.RadioButton) {
+                    if (exercise.id != selectedId) onPick(exercise.id)
+                }.padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(selected = exercise.id == selectedId, onClick = null)
+                Spacer(Modifier.width(8.dp))
+                Column {
+                    Text(exerciseName(exercise), style = MaterialTheme.typography.bodyLarge)
+                    if (exercise.builtIn?.floor == true) {
+                        Text(stringResource(R.string.edit_version_floor), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+        }
     }
 }
 

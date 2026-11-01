@@ -60,6 +60,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.fittracker.BuildConfig
 import app.fittracker.FitApp
 import app.fittracker.R
+import app.fittracker.data.Exercise
+import app.fittracker.domain.StartLevel
+import app.fittracker.ui.start.startLevelLabel
 import app.fittracker.ui.FitCard
 import app.fittracker.ui.currentLocale
 import app.fittracker.ui.exerciseName
@@ -144,35 +147,23 @@ fun SettingsScreen(onEditExercise: (Long) -> Unit, onAddExercise: () -> Unit) {
                 }
             }
             item { UpdatesCard(s.settings.autoUpdateCheck, vm::setAutoUpdateCheck) }
+            item { DifficultyCard(s.settings.avoidFloor, s.settings.startLevel, vm::setAvoidFloor, vm::setStartLevel) }
             item {
                 FitCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                         Text(stringResource(R.string.settings_moves), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 4.dp))
-                        s.exercises.forEach { (exercise, goal) ->
-                            Row(
-                                Modifier.fillMaxWidth().clickable { onEditExercise(exercise.id) }.padding(vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                MoveFigure(
-                                    Poses.forKey(exercise.builtIn?.key),
-                                    contentDescription = null,
-                                    animate = false,
-                                    modifier = Modifier.width(48.dp),
-                                    color = if (exercise.enabled) MaterialTheme.brand.figure else MaterialTheme.colorScheme.outline,
-                                )
-                                Spacer(Modifier.width(12.dp))
-                                Column(Modifier.weight(1f)) {
-                                    Text(exerciseName(exercise), style = MaterialTheme.typography.bodyLarge)
-                                    Text(
-                                        stringResource(R.string.settings_move_summary, setAmount(exercise), totalAmount(exercise.unit, goal)),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                if (!exercise.enabled) {
-                                    Chip(stringResource(R.string.settings_move_off), MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
+                        // One row per ladder, showing the version in use, so the list doesn't grow with every easier version.
+                        s.moves.ladders.forEach { ladder ->
+                            val (exercise, goal) = ladder.current ?: ladder.rungs.last()
+                            val version = if (ladder.rungs.size > 1 && ladder.current != null) {
+                                stringResource(R.string.settings_move_version, ladder.rungs.indexOf(ladder.current) + 1, ladder.rungs.size)
+                            } else {
+                                null
                             }
+                            MoveRow(exercise, goal, version, off = ladder.current == null, onClick = { onEditExercise(exercise.id) })
+                        }
+                        s.moves.custom.forEach { (exercise, goal) ->
+                            MoveRow(exercise, goal, null, off = !exercise.enabled, onClick = { onEditExercise(exercise.id) })
                         }
                         OutlinedButton(onClick = onAddExercise, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) { Text(stringResource(R.string.settings_add_move)) }
                     }
@@ -197,6 +188,92 @@ fun SettingsScreen(onEditExercise: (Long) -> Unit, onAddExercise: () -> Unit) {
                 text = { TimePicker(picker) },
             )
         }
+    }
+}
+
+@Composable
+private fun MoveRow(exercise: Exercise, goal: Int, version: String?, off: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        MoveFigure(
+            Poses.forKey(exercise.builtIn?.key),
+            contentDescription = null,
+            animate = false,
+            modifier = Modifier.width(48.dp),
+            color = if (off) MaterialTheme.colorScheme.outline else MaterialTheme.brand.figure,
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(exerciseName(exercise), style = MaterialTheme.typography.bodyLarge)
+            val summary = stringResource(R.string.settings_move_summary, setAmount(exercise), totalAmount(exercise.unit, goal))
+            Text(
+                if (version != null) "$summary · $version" else summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (off) {
+            Chip(stringResource(R.string.settings_move_off), MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun DifficultyCard(avoidFloor: Boolean, level: StartLevel?, onAvoidFloor: (Boolean) -> Unit, onLevel: (StartLevel) -> Unit) {
+    var choosing by rememberSaveable { mutableStateOf(false) }
+    FitCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Text(stringResource(R.string.settings_difficulty), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.settings_difficulty_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 2.dp, bottom = 4.dp),
+            )
+            SwitchRow(stringResource(R.string.settings_avoid_floor), avoidFloor, onAvoidFloor)
+            Row(
+                Modifier.fillMaxWidth().clickable(role = Role.Button) { choosing = true }.padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(R.string.settings_start_level), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    level?.let { stringResource(startLevelLabel(it)) } ?: stringResource(R.string.settings_start_level_none),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+    }
+    if (choosing) {
+        var picked by rememberSaveable { mutableStateOf(level ?: StartLevel.MIDDLE) }
+        AlertDialog(
+            onDismissRequest = { choosing = false },
+            title = { Text(stringResource(R.string.settings_start_level)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.settings_start_level_reset), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 8.dp))
+                    StartLevel.entries.forEach { option ->
+                        Row(
+                            Modifier.fillMaxWidth().selectable(picked == option, role = Role.RadioButton) { picked = option }.padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = picked == option, onClick = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(startLevelLabel(option)))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    choosing = false
+                    onLevel(picked)
+                }) { Text(stringResource(R.string.settings_start_level_apply)) }
+            },
+            dismissButton = { TextButton(onClick = { choosing = false }) { Text(stringResource(android.R.string.cancel)) } },
+        )
     }
 }
 

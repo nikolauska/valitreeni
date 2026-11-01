@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.fittracker.FitApp
 import app.fittracker.data.Exercise
+import app.fittracker.domain.Effort
 import app.fittracker.domain.LogSource
 import app.fittracker.reminders.Notifications
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-data class PlannedSet(val exercise: Exercise, val amount: Int, val isNew: Boolean)
+data class PlannedSet(
+    val exercise: Exercise,
+    val amount: Int,
+    val isNew: Boolean,
+    /** The version the "Easier version" link switches to; null at the bottom of the ladder. */
+    val easier: Exercise?,
+)
 
 data class RoundPlan(val sets: List<PlannedSet>, val roundNumber: Int, val totalRounds: Int, val estimatedMinutes: Int)
 
@@ -46,22 +53,42 @@ class RoundViewModel(private val app: FitApp) : ViewModel() {
             val day = repo.day(today)
             val byId = day.focus.associateBy { it.exercise.id }
             val sets = day.round.items.mapNotNull { item ->
-                byId[item.exerciseId]?.let { PlannedSet(it.exercise, item.amount, repo.isNewMove(item.exerciseId, today)) }
+                byId[item.exerciseId]?.let { plannedSet(it.exercise, item.amount) }
             }
             _plan.value = RoundPlan(sets, day.round.roundNumber, day.round.totalRounds, day.round.estimatedMinutes)
         }
     }
 
+    private suspend fun plannedSet(exercise: Exercise, amount: Int) =
+        PlannedSet(exercise, amount, repo.isNewMove(exercise.id, repo.today()), repo.easierVersion(exercise.id))
+
     /** Logs the current move's set right away, so leaving halfway keeps what was done. */
-    fun done() {
+    fun done(effort: Effort) {
         val set = _plan.value?.sets?.getOrNull(index) ?: return
         if (!advance()) return
         logged++
         // Runs in the app scope: closing the screen right after the last Done must not drop the save.
         app.appScope.launch {
-            repo.log(set.exercise.id, set.amount, LogSource.APP)
+            repo.log(set.exercise.id, set.amount, LogSource.APP, effort)
             // The user is doing the round in the app, so the reminder for it is no longer needed.
             Notifications.cancelRound(app)
+        }
+    }
+
+    /** Swaps the current move for its easier version in place; the rest of the round stays as it was. */
+    fun switchToEasier() {
+        val plan = _plan.value ?: return
+        val set = plan.sets.getOrNull(index) ?: return
+        if (set.easier == null || saving) return
+        saving = true
+        viewModelScope.launch {
+            val easier = repo.switchToEasier(set.exercise.id, repo.today())
+            if (easier != null) {
+                val sets = plan.sets.toMutableList()
+                sets[index] = plannedSet(easier, easier.amountPerSet)
+                _plan.value = plan.copy(sets = sets)
+            }
+            saving = false
         }
     }
 

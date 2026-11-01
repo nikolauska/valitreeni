@@ -33,6 +33,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -64,11 +67,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.fittracker.FitApp
 import app.fittracker.R
+import app.fittracker.domain.Effort
 import app.fittracker.domain.MoveUnit
 import app.fittracker.ui.BackButton
 import app.fittracker.ui.FitCard
@@ -99,7 +104,10 @@ fun RoundScreen(onBack: () -> Unit, onOpenTutorial: (Long) -> Unit) {
         p.sets.isEmpty() -> AllDone(onBack)
         checklist -> Checklist(p, p.sets.drop(vm.index), vm.saving, onBack = { checklist = false }, onLog = { vm.logAll(it, onBack) })
         vm.index >= p.sets.size -> Finished(vm.logged, onBack)
-        else -> Guided(p, vm.index, onClose = onBack, onLogAll = { checklist = true }, onDone = vm::done, onSkip = vm::skip, onOpenTutorial = onOpenTutorial)
+        else -> Guided(
+            p, vm.index, onClose = onBack, onLogAll = { checklist = true }, onDone = vm::done, onSkip = vm::skip,
+            onEasier = vm::switchToEasier, onOpenTutorial = onOpenTutorial,
+        )
     }
 }
 
@@ -109,11 +117,14 @@ private fun Guided(
     index: Int,
     onClose: () -> Unit,
     onLogAll: () -> Unit,
-    onDone: () -> Unit,
+    onDone: (Effort) -> Unit,
     onSkip: () -> Unit,
+    onEasier: () -> Unit,
     onOpenTutorial: (Long) -> Unit,
 ) {
     val set = plan.sets[index]
+    // Starts on OK for every move, so answering costs no tap when the set felt fine.
+    var effort by rememberSaveable(index, set.exercise.id) { mutableStateOf(Effort.OK) }
     val e = set.exercise
     val brand = MaterialTheme.brand
     val next = plan.sets.getOrNull(index + 1)?.let { exerciseName(it.exercise) }
@@ -168,10 +179,16 @@ private fun Guided(
                     Tip(set, onOpenTutorial)
                 }
             }
+            EffortPicker(effort) { effort = it }
+            set.easier?.let { easier ->
+                TextButton(onClick = onEasier, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    Text(stringResource(R.string.round_easier_version, exerciseName(easier)))
+                }
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = onSkip, modifier = Modifier.height(56.dp)) { Text(stringResource(R.string.round_skip)) }
                 Button(
-                    onClick = onDone,
+                    onClick = { onDone(effort) },
                     modifier = Modifier.weight(1f).height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = brand.accent, contentColor = brand.onAccent),
                 ) {
@@ -179,8 +196,37 @@ private fun Guided(
                         if (next != null) stringResource(R.string.round_done_next, next) else stringResource(R.string.round_done),
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
+                        // Some move names are long (e.g. "Istuvat polven ojennukset"); show the cut instead of hiding it.
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EffortPicker(selected: Effort, onSelect: (Effort) -> Unit) {
+    val labels = listOf(
+        Effort.HARD to stringResource(R.string.round_effort_hard),
+        Effort.OK to stringResource(R.string.round_effort_ok),
+        Effort.EASY to stringResource(R.string.round_effort_easy),
+    )
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            stringResource(R.string.round_effort_question),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
+        )
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            labels.forEachIndexed { i, (effort, label) ->
+                SegmentedButton(
+                    selected = selected == effort,
+                    onClick = { onSelect(effort) },
+                    shape = SegmentedButtonDefaults.itemShape(i, labels.size),
+                    label = { Text(label, maxLines = 1) },
+                )
             }
         }
     }

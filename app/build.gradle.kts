@@ -75,6 +75,9 @@ android {
     }
 }
 
+// Migration tests build old database versions on the device from the exported schemas.
+android.sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
+
 ksp {
     // Exported schemas let future migrations be checked against what is already on the phone.
     arg("room.schemaLocation", "$projectDir/schemas")
