@@ -92,12 +92,13 @@ abstract class FitDatabase : RoomDatabase() {
                     arrayOf<Any>(move.dailyGoal, move.key),
                 )
             }
-            // Everyone starts on the original moves; a new user's first-run answer moves them from there.
+            // Everyone starts on the original moves (or a newer ladder's easiest one); a new user's
+            // first-run answer, or an updater's one-time placement, moves them from there.
             MoveCatalog.ladders.keys.forEach { ladder ->
                 db.execSQL(
                     "INSERT OR IGNORE INTO ladder_state (ladderKey, exerciseId, autoAdjust, changedOn) " +
                         "SELECT ?, id, 1, 0 FROM exercise WHERE builtinKey = ?",
-                    arrayOf<Any>(ladder, MoveCatalog.classicRung(ladder).key),
+                    arrayOf<Any>(ladder, MoveCatalog.seedRung(ladder).key),
                 )
             }
         }

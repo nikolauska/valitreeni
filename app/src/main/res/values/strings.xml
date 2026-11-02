@@ -29,6 +29,30 @@
     <string name="move_march_in_place">Marching in place</string>
     <string name="move_step_jacks">Step jacks</string>
     <string name="move_doorframe_rows">Doorframe rows</string>
+    <string name="move_jump_squats">Jump squats</string>
+    <string name="move_table_rows">Table rows</string>
+    <string name="move_standing_glute_kickbacks">Standing glute kickbacks</string>
+    <string name="move_single_leg_glute_bridges">Single-leg glute bridges</string>
+    <string name="move_supported_reverse_lunges">Supported reverse lunges</string>
+    <string name="move_bulgarian_split_squats">Bulgarian split squats</string>
+    <string name="move_high_wall_sit">High wall sit</string>
+    <string name="move_single_leg_wall_sit">Single-leg wall sit</string>
+    <string name="move_seated_dips">Seated dips</string>
+    <string name="move_bent_knee_chair_dips">Bent-knee chair dips</string>
+    <string name="move_seated_lean_backs">Seated lean-backs</string>
+    <string name="move_tuck_hollow_hold">Tuck hollow hold</string>
+    <string name="move_squat_reaches">Squat and reach</string>
+    <string name="move_incline_burpees">Incline burpees</string>
+    <string name="move_incline_pike_pushups">Incline pike push-ups</string>
+    <string name="move_hip_hinges">Hip hinges</string>
+    <string name="move_supported_single_leg_hinges">Supported single-leg hinges</string>
+    <string name="move_single_leg_deadlifts">Single-leg deadlifts</string>
+    <string name="move_wall_side_plank">Wall side plank</string>
+    <string name="move_knee_side_plank">Knee side plank</string>
+    <string name="move_side_plank">Side plank</string>
+    <string name="move_standing_crossbody_knees">Standing cross-body knees</string>
+    <string name="move_seated_knee_tucks">Seated knee tucks</string>
+    <string name="move_bicycle_crunches">Bicycle crunches</string>
 
     <!-- Today -->
     <string name="focus_title">Today\'s focus</string>

@@ -210,9 +210,11 @@ class FitRepository(
      * Takes a move out of [date]'s focus, putting another one in its place when there is one.
      * Unlike [swapFocus] the move leaves even without a replacement: it was turned off or deleted.
      */
-    private suspend fun dropFromFocus(date: LocalDate, exerciseId: Long) = focusLock.withLock {
+    private suspend fun dropFromFocus(date: LocalDate, exerciseId: Long) = focusLock.withLock { dropFromFocusLocked(date, exerciseId) }
+
+    private suspend fun dropFromFocusLocked(date: LocalDate, exerciseId: Long) {
         val current = dao.focus(date).map { it.exerciseId }
-        if (exerciseId !in current) return@withLock
+        if (exerciseId !in current) return
         val replacement = FocusPicker.replacement(candidates().filter { it.exerciseId != exerciseId }, current, exerciseId)
         dao.deleteFocus(date, exerciseId)
         replacement?.let { dao.insertFocus(listOf(DailyFocusEntity(date, it))) }
@@ -271,23 +273,55 @@ class FitRepository(
 
     /**
      * Puts every ladder at the version that suits [level] with the usual set sizes, as if the app was
-     * just installed. Moves without an easier version are only switched on from the level they suit.
+     * just installed. A ladder with no version gentle enough for [level] is switched off instead.
      */
     suspend fun applyStartLevel(level: StartLevel) = focusLock.withLock {
         val date = today()
         val exercises = dao.exercises()
         val changes = dao.goalChanges().map { it.toModel() }
         for (ladder in ladders(exercises, dao.ladderStates())) {
-            ladder.moves.zip(ladder.entities).forEach { (move, entity) ->
-                val enabled = if (ladder.moves.size == 1) move.level <= level.level else entity.enabled
+            val start = Ladders.startRung(ladder.rungs, level)
+            val suits = Ladders.suits(ladder.rungs, level)
+            ladder.moves.zip(ladder.entities).forEachIndexed { index, (move, entity) ->
+                // The chosen version is switched on: hard moves that used to be single moves were turned
+                // off for gentler levels, and picking Strong later must bring them back.
+                val enabled = suits && (entity.enabled || index == start)
                 dao.updateExercise(entity.copy(amountPerSet = move.amountPerSet, enabled = enabled))
                 if (Goals.goalFor(entity.id, date, changes) != move.dailyGoal) dao.setGoal(entity.id, move.dailyGoal, date)
             }
-            val start = Ladders.startRung(ladder.rungs, level)
             dao.upsertLadderState(LadderStateEntity(ladder.key, ladder.entities[start].id, autoAdjust = true, changedOn = date))
         }
         // Today's focus was picked from the old moves; the next look picks it again.
         dao.clearFocus(date)
+    }
+
+    /**
+     * One-time step after an update added moves since catalog [fromVersion]: ladders that are new, or
+     * whose current version is off, move to the version that suits [level] (Gentle when the user never
+     * chose, the safe side). Today's focus follows, in case an alarm picked it before this ran.
+     */
+    suspend fun placeNewVersions(level: StartLevel?, fromVersion: Int) = focusLock.withLock {
+        val date = today()
+        val avoid = avoidFloor.first()
+        for (ladder in ladders(dao.exercises(), dao.ladderStates())) {
+            val added = ladder.moves.count { it.since > fromVersion }
+            if (added == 0) continue
+            val isNew = added == ladder.moves.size
+            val placeFor = level ?: StartLevel.GENTLE
+            if (!Ladders.suits(ladder.rungs, placeFor)) {
+                // Like the first-run question would: the added versions stay off when none fits the level.
+                ladder.moves.zip(ladder.entities).filter { (move, _) -> move.since > fromVersion }.forEach { (_, entity) ->
+                    dao.updateExercise(entity.copy(enabled = false))
+                    dropFromFocusLocked(date, entity.id)
+                }
+                continue
+            }
+            val target = Ladders.placeAfterUpdate(ladder.rungs, ladder.activeIndex, isNew, placeFor) ?: continue
+            val previous = ladder.effective(avoid)?.id
+            dao.upsertLadderState(ladder.state.copy(exerciseId = ladder.entities[target].id, changedOn = date))
+            val now = Ladders.effectiveRung(ladder.rungs, target, avoid)?.let { ladder.entities[it].id }
+            if (previous != null && now != null && previous != now) replaceInFocus(date, previous, now)
+        }
     }
 
     suspend fun undoLast(exerciseId: Long, date: LocalDate) = dao.deleteLatestLog(exerciseId, date)
@@ -402,7 +436,7 @@ class FitRepository(
             val entities = moves.map { byKey[it.key] ?: return@mapNotNull null }
             // The catalog sync adds a state for every ladder; the fallback only covers a half-open database.
             val state = stateByKey[key]
-                ?: LadderStateEntity(key, byKey.getValue(MoveCatalog.classicRung(key).key).id, changedOn = LocalDate.ofEpochDay(0))
+                ?: LadderStateEntity(key, byKey.getValue(MoveCatalog.seedRung(key).key).id, changedOn = LocalDate.ofEpochDay(0))
             LadderData(key, moves, entities, state)
         }.sortedBy { ladder -> ladder.entities.minOf { it.sortOrder } }
     }

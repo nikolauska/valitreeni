@@ -29,6 +29,30 @@
     <string name="move_march_in_place">Marssi paikallaan</string>
     <string name="move_step_jacks">Haara-askeleet</string>
     <string name="move_doorframe_rows">Ovenkarmisoudut</string>
+    <string name="move_jump_squats">Hyppykyykyt</string>
+    <string name="move_table_rows">Pöytäsoudut</string>
+    <string name="move_standing_glute_kickbacks">Takapotkut seisten</string>
+    <string name="move_single_leg_glute_bridges">Yhden jalan lantionnostot</string>
+    <string name="move_supported_reverse_lunges">Tuetut takaaskelkyykyt</string>
+    <string name="move_bulgarian_split_squats">Bulgarialaiset askelkyykyt</string>
+    <string name="move_high_wall_sit">Korkea seinäistunta</string>
+    <string name="move_single_leg_wall_sit">Yhden jalan seinäistunta</string>
+    <string name="move_seated_dips">Istumadipit</string>
+    <string name="move_bent_knee_chair_dips">Tuolidipit polvet koukussa</string>
+    <string name="move_seated_lean_backs">Taaksenojat istuen</string>
+    <string name="move_tuck_hollow_hold">Hollow-pito polvet koukussa</string>
+    <string name="move_squat_reaches">Kyykky ja kurotus</string>
+    <string name="move_incline_burpees">Tuoliburpeet</string>
+    <string name="move_incline_pike_pushups">Kaltevat pike-punnerrukset</string>
+    <string name="move_hip_hinges">Lantiosaranat</string>
+    <string name="move_supported_single_leg_hinges">Tuetut yhden jalan saranat</string>
+    <string name="move_single_leg_deadlifts">Yhden jalan maastavedot</string>
+    <string name="move_wall_side_plank">Kylkilankku seinää vasten</string>
+    <string name="move_knee_side_plank">Kylkilankku polvilta</string>
+    <string name="move_side_plank">Kylkilankku</string>
+    <string name="move_standing_crossbody_knees">Ristiinpolvennostot seisten</string>
+    <string name="move_seated_knee_tucks">Polvenvedot istuen</string>
+    <string name="move_bicycle_crunches">Pyöräilyvatsat</string>
 
     <!-- Today -->
     <string name="focus_title">Päivän fokus</string>

@@ -202,15 +202,62 @@ class FitRepositoryTest {
         assertTrue(focus.none { it.exercise.builtIn?.floor == true })
     }
 
+    private suspend fun currentKeys() = repo.observeMoves(day).first().ladders.associate { it.key to it.current?.first?.builtIn?.key }
+
     @Test
-    fun gentleStartUsesTheEasiestVersionsAndTurnsHardSingleMovesOff() = runTest {
+    fun gentleStartUsesTheEasiestVersions() = runTest {
         repo.applyStartLevel(StartLevel.GENTLE)
-        val ladders = repo.observeMoves(day).first().ladders.associateBy { it.key }
-        assertEquals("wall_pushups", ladders.getValue("push").current?.first?.builtIn?.key)
-        assertEquals("seated_leg_extensions", ladders.getValue("squat").current?.first?.builtIn?.key)
-        assertNull(ladders.getValue("burpees").current)
+        val current = currentKeys()
+        assertEquals("wall_pushups", current["push"])
+        assertEquals("seated_leg_extensions", current["squat"])
+        assertEquals("squat_reaches", current["burpees"])
+        // No pike push-up version is gentle enough, so that ladder stays off.
+        assertNull(current["pike_pushups"])
         repo.applyStartLevel(StartLevel.STRONG)
-        assertEquals("pushups", repo.observeMoves(day).first().ladders.single { it.key == "push" }.current?.first?.builtIn?.key)
+        assertEquals("pushups", currentKeys()["push"])
+        assertEquals("pike_pushups", currentKeys()["pike_pushups"])
+    }
+
+    @Test
+    fun pickingStrongLaterTurnsTheHardVersionBackOn() = runTest {
+        // Before 0.4.0 a gentler start turned chair dips off, because they had no easier version.
+        val dips = builtIn("chair_dips")
+        repo.updateExercise(dips.id, dips.amountPerSet, enabled = false, goal = repo.goal(dips.id, day), customName = null)
+        repo.applyStartLevel(StartLevel.STRONG)
+        assertEquals("chair_dips", currentKeys()["chair_dips"])
+    }
+
+    @Test
+    fun updatePlacesGrownAndNewLaddersForTheSavedLevel() = runTest {
+        // An updated Gentle phone: chair dips are off, and their ladder still points at them.
+        val dips = builtIn("chair_dips")
+        repo.updateExercise(dips.id, dips.amountPerSet, enabled = false, goal = repo.goal(dips.id, day), customName = null)
+        repo.placeNewVersions(StartLevel.GENTLE, fromVersion = 0)
+        val current = currentKeys()
+        assertEquals("seated_dips", current["chair_dips"])
+        assertEquals("hip_hinges", current["hinge"])
+        // Ladders the user is training stay where they are.
+        assertEquals("pushups", current["push"])
+        assertEquals("burpees", current["burpees"])
+    }
+
+    @Test
+    fun updateKeepsAGentleUsersPikeLadderOff() = runTest {
+        repo.applyStartLevel(StartLevel.GENTLE)
+        // What 0.3.x left behind: pike push-ups off and the new incline version freshly seeded on.
+        val incline = builtIn("incline_pike_pushups")
+        repo.updateExercise(incline.id, incline.amountPerSet, enabled = true, goal = repo.goal(incline.id, day), customName = null)
+        repo.placeNewVersions(StartLevel.GENTLE, fromVersion = 0)
+        assertNull(currentKeys()["pike_pushups"])
+    }
+
+    @Test
+    fun updatePlacementFollowsTheLevelAndRunsOnlyForNewerMoves() = runTest {
+        repo.placeNewVersions(StartLevel.STRONG, fromVersion = 0)
+        assertEquals("single_leg_deadlifts", currentKeys()["hinge"])
+        repo.chooseVersion(builtIn("hip_hinges").id)
+        repo.placeNewVersions(StartLevel.STRONG, fromVersion = MoveCatalog.VERSION)
+        assertEquals("hip_hinges", currentKeys()["hinge"])
     }
 
     @Test

@@ -4,6 +4,8 @@ import app.fittracker.domain.Effort.EASY
 import app.fittracker.domain.Effort.HARD
 import app.fittracker.domain.Effort.OK
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -110,5 +112,37 @@ class ProgressionTest {
         assertEquals(2, Ladders.startRung(push, StartLevel.MIDDLE))
         assertEquals(3, Ladders.startRung(push, StartLevel.STRONG))
         assertEquals(0, Ladders.startRung(listOf(rung(9, 1, 1, 1, level = 2)), StartLevel.GENTLE))
+    }
+
+    private val grown = listOf(
+        rung(20, 4, 8, 15, level = 0),
+        rung(21, 4, 8, 15, level = 1),
+        rung(22, 5, 10, 20, level = 2),
+    )
+
+    @Test
+    fun `a ladder in use stays put when versions are added`() {
+        assertNull(Ladders.placeAfterUpdate(grown, 2, isNew = false, StartLevel.GENTLE))
+    }
+
+    @Test
+    fun `a ladder whose move was off goes to the version for the level, not one step down`() {
+        val hardOff = grown.mapIndexed { i, r -> if (i == 2) r.copy(enabled = false) else r }
+        assertEquals(0, Ladders.placeAfterUpdate(hardOff, 2, isNew = false, StartLevel.GENTLE))
+        assertEquals(1, Ladders.placeAfterUpdate(hardOff, 2, isNew = false, StartLevel.MIDDLE))
+        assertNull(Ladders.placeAfterUpdate(hardOff, 2, isNew = false, StartLevel.STRONG))
+    }
+
+    @Test
+    fun `a ladder suits a level only when some version is gentle enough`() {
+        val pike = listOf(rung(30, 3, 6, 12, level = 1), rung(31, 4, 8, 15, level = 2))
+        assertFalse(Ladders.suits(pike, StartLevel.GENTLE))
+        assertTrue(Ladders.suits(pike, StartLevel.MIDDLE))
+    }
+
+    @Test
+    fun `a new ladder starts at the version for the level`() {
+        assertNull(Ladders.placeAfterUpdate(grown, 0, isNew = true, StartLevel.GENTLE))
+        assertEquals(2, Ladders.placeAfterUpdate(grown, 0, isNew = true, StartLevel.STRONG))
     }
 }

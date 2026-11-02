@@ -44,6 +44,20 @@ object Ladders {
     /** Hardest rung at or below the chosen level; the easiest rung when every rung is above it. */
     fun startRung(rungs: List<Rung>, level: StartLevel): Int =
         rungs.indexOfLast { it.level <= level.level }.coerceAtLeast(0)
+
+    /** Whether any version is gentle enough for [level]; pike push-ups have none for Gentle. */
+    fun suits(rungs: List<Rung>, level: StartLevel): Boolean = rungs.any { it.level <= level.level }
+
+    /**
+     * Where a ladder goes once after an update added versions to it; null keeps it where it is.
+     * A brand-new ladder and one whose current version is off both move to the version that suits
+     * [level]: otherwise a Gentle user whose hard move was off would step down only one version,
+     * onto a middle one. Ladders the user is training are left alone.
+     */
+    fun placeAfterUpdate(rungs: List<Rung>, active: Int, isNew: Boolean, level: StartLevel): Int? {
+        if (!isNew && rungs[active].enabled) return null
+        return startRung(rungs, level).takeIf { it != active }
+    }
 }
 
 object Progression {

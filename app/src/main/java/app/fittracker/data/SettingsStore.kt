@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
@@ -31,6 +32,8 @@ data class Settings(
     val startLevel: StartLevel?,
     /** Keeps moves that start on the floor out of focus. */
     val avoidFloor: Boolean,
+    /** The [MoveCatalog.VERSION] whose new moves have been placed for this user; 0 before 0.4.0. */
+    val catalogVersion: Int,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -46,6 +49,7 @@ class SettingsStore(private val context: Context) {
         val autoUpdate = booleanPreferencesKey("auto_update_check")
         val startLevel = stringPreferencesKey("start_level")
         val avoidFloor = booleanPreferencesKey("avoid_floor")
+        val catalogVersion = intPreferencesKey("catalog_version")
     }
 
     val settings: Flow<Settings> = context.dataStore.data.map { p ->
@@ -59,6 +63,7 @@ class SettingsStore(private val context: Context) {
             autoUpdateCheck = p[Keys.autoUpdate] ?: true,
             startLevel = p[Keys.startLevel]?.let { name -> StartLevel.entries.firstOrNull { it.name == name } },
             avoidFloor = p[Keys.avoidFloor] ?: false,
+            catalogVersion = p[Keys.catalogVersion] ?: 0,
         )
     }
 
@@ -77,6 +82,8 @@ class SettingsStore(private val context: Context) {
         p[Keys.startLevel] = level.name
         p[Keys.avoidFloor] = level == StartLevel.GENTLE
     }
+
+    suspend fun setCatalogVersion(version: Int) = context.dataStore.edit { it[Keys.catalogVersion] = version }
 
     suspend fun setAvoidFloor(avoid: Boolean) = context.dataStore.edit { it[Keys.avoidFloor] = avoid }
 

@@ -3,6 +3,7 @@ package app.fittracker
 import android.app.Application
 import app.fittracker.data.FitDatabase
 import app.fittracker.data.FitRepository
+import app.fittracker.data.MoveCatalog
 import app.fittracker.data.SettingsStore
 import app.fittracker.reminders.Notifications
 import app.fittracker.reminders.ReminderScheduler
@@ -30,6 +31,21 @@ class FitApp : Application() {
     override fun onCreate() {
         super.onCreate()
         Notifications.ensureChannel(this)
-        appScope.launch { scheduler.checkMissedAndReschedule() }
+        appScope.launch {
+            // Before alarms are re-armed, so a reminder right after an update already lists placed moves.
+            placeNewMoves()
+            scheduler.checkMissedAndReschedule()
+        }
+    }
+
+    /**
+     * Runs once per catalog version. On a fresh install it changes nothing that matters, because the
+     * first-run level question places every ladder anyway.
+     */
+    private suspend fun placeNewMoves() {
+        val current = settings.current()
+        if (current.catalogVersion >= MoveCatalog.VERSION) return
+        repository.placeNewVersions(current.startLevel, current.catalogVersion)
+        settings.setCatalogVersion(MoveCatalog.VERSION)
     }
 }

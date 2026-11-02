@@ -131,9 +131,10 @@ class MigrationTest {
             assertEquals(byKey.getValue("pushups").id, states.getValue("push").exerciseId)
             assertEquals(byKey.getValue("squats").id, states.getValue("squat").exerciseId)
 
-            // One row per ladder in use: 13 ladders minus burpees (turned off), plus the custom move.
+            // One row per ladder plus the custom move: burpees are off, but their newer, easier
+            // versions arrive switched on, so that ladder is still in use.
             val repo = FitRepository(dao, { day.plusDays(1).atStartOfDay(java.time.ZoneId.of("Europe/Helsinki")) })
-            assertEquals(12 + 1, repo.day(day.plusDays(1)).others.size)
+            assertEquals(MoveCatalog.ladders.size + 1, repo.day(day.plusDays(1)).others.size)
         } finally {
             db.close()
         }

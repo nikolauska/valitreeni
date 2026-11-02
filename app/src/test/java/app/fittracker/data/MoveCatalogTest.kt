@@ -1,6 +1,8 @@
 package app.fittracker.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -27,9 +29,30 @@ class MoveCatalogTest {
     }
 
     @Test
-    fun `every ladder contains one of the original moves for updating users`() {
-        MoveCatalog.ladders.keys.forEach { MoveCatalog.classicRung(it) }
-        assertEquals("pushups", MoveCatalog.classicRung("push").key)
+    fun `older ladders start updating users on the original move, newer ones on their easiest`() {
+        MoveCatalog.ladders.filterValues { moves -> moves.any { it.since == 0 } }.keys.forEach {
+            assertNotNull(it, MoveCatalog.classicRung(it))
+        }
+        assertEquals("pushups", MoveCatalog.seedRung("push").key)
+        assertEquals("chair_dips", MoveCatalog.seedRung("chair_dips").key)
+        assertNull(MoveCatalog.classicRung("hinge"))
+        assertEquals("hip_hinges", MoveCatalog.seedRung("hinge").key)
+    }
+
+    @Test
+    fun `every ladder has a gentle, a middle and a strong version`() {
+        // Pike push-ups have no good gentle version without equipment, so that slot stays empty.
+        MoveCatalog.ladders.forEach { (ladder, moves) ->
+            val expected = if (ladder == "pike_pushups") setOf(1, 2) else setOf(0, 1, 2)
+            assertEquals(ladder, expected, moves.map { it.level }.toSet())
+        }
+    }
+
+    @Test
+    fun `newer moves come after older ones so existing sort order never changes`() {
+        val versions = MoveCatalog.all.map { it.since }
+        assertEquals(versions.sorted(), versions)
+        assertEquals(MoveCatalog.VERSION, versions.last())
     }
 
     @Test
@@ -40,8 +63,8 @@ class MoveCatalogTest {
     }
 
     @Test
-    fun `every ladder has a floor-free rung except moves that only exist on the floor`() {
+    fun `every ladder has a floor-free rung`() {
         val floorOnly = MoveCatalog.ladders.filterValues { moves -> moves.all { it.floor } }.keys
-        assertEquals(setOf("glute_bridges", "pike_pushups", "hollow_hold", "burpees"), floorOnly)
+        assertEquals(emptySet<String>(), floorOnly)
     }
 }
