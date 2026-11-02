@@ -24,7 +24,7 @@ Välitreeni (Finnish for "in-between workout") is an Android app for doing bodyw
 
 **Or go one move at a time.** In the app, **Start round** walks you through the round with a big animated figure for each move, a countdown for holds like the plank, and a buzz when time is up.
 
-**Moves that fit you.** Most moves come in easier and harder versions, from wall push-ups to push-ups and from chair sit-to-stands to squats. After each set in the app, tap **Too hard**, **OK** or **Too easy**. Overnight Välitreeni adjusts the set size, and moves you to a harder or easier version when you're ready. If a move is too much right now, **Easier version** swaps it on the spot. On first launch you pick where to start: Gentle (standing, chair and wall moves, nothing on the floor), Middle or Strong. There's also a setting to avoid moves on the floor.
+**Moves that fit you.** Almost every move comes in a gentle, a middle and a strong version, from wall push-ups to push-ups and from chair sit-to-stands to jump squats. After each set in the app, tap **Too hard**, **OK** or **Too easy**. Overnight Välitreeni adjusts the set size, and moves you to a harder or easier version when you're ready. If a move is too much right now, **Easier version** swaps it on the spot. On first launch you pick where to start: Gentle (standing, chair and wall moves, nothing on the floor), Middle or Strong. There's also a setting to avoid moves on the floor.
 
 **Learn the moves.** Every move has a tutorial with steps, common mistakes, and tips for making it easier or harder.
 
