@@ -9,7 +9,7 @@ All code is under `app/src/main/java/app/fittracker/`. The package name is still
 - `domain/`: plain-Kotlin rules (daily focus, rounds, streaks, reminder times), unit tested in `app/src/test`.
 - `data/`: Room database, repository, settings DataStore, built-in move catalog.
 - `reminders/`: exact alarms, notifications and their action receivers.
-- `update/`: GitHub release check and self-install through `PackageInstaller`.
+- `update/`: GitHub release check, download through `DownloadManager`, and hand-off to Android's installer.
 - `ui/`: one package per screen; `ui/theme/Theme.kt` holds the fixed "Pine" brand palette (`MaterialTheme.brand`) and fonts.
 
 ## Checks

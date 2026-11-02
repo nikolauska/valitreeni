@@ -3,6 +3,8 @@ package app.fittracker.ui
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,17 +23,17 @@ import app.fittracker.update.Updater
 fun rememberUpdater(): Updater = (LocalContext.current.applicationContext as FitApp).updater
 
 /**
- * Lives at the top of the UI so the install confirmation opens whichever screen is showing,
+ * Lives at the top of the UI so Android's installer opens over whichever screen is showing,
  * and so returning from the "install unknown apps" setting carries on with the update.
  */
 @Composable
 fun UpdateEffects() {
-    val context = LocalContext.current
     val updater = rememberUpdater()
     val state by updater.state.collectAsStateWithLifecycle()
+    val installer = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { updater.onInstallResult(it.resultCode) }
     LaunchedEffect(state) {
         (state as? UpdateState.Confirm)?.let {
-            context.startActivity(it.intent)
+            installer.launch(it.intent)
             updater.confirmShown()
         }
     }

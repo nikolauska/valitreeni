@@ -1,8 +1,12 @@
 package app.fittracker.update
 
+import android.app.Activity
+import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageInstaller
+import android.net.Uri
+import android.os.Environment
+import androidx.core.net.toUri
 import app.fittracker.BuildConfig
 import app.fittracker.data.SettingsStore
 import java.io.IOException
@@ -11,6 +15,7 @@ import java.net.URL
 import java.security.MessageDigest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,14 +40,13 @@ sealed interface UpdateState {
 enum class FailReason { OFFLINE, DOWNLOAD, DAMAGED, INSTALL }
 
 private const val TIMEOUT_MS = 15_000
+private const val POLL_MS = 300L
+private const val APK_MIME = "application/vnd.android.package-archive"
 
 class Updater(private val context: Context, private val settings: SettingsStore, private val scope: CoroutineScope) {
     private val _state = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val state: StateFlow<UpdateState> = _state.asStateFlow()
     private var checkedOnOpen = false
-
-    /** The release being installed, so results from the system can be shown against it. */
-    private var pending: Release? = null
 
     /**
      * Runs from the activity, not Application.onCreate: reminder alarms also start the process,
@@ -51,6 +55,7 @@ class Updater(private val context: Context, private val settings: SettingsStore,
     fun checkOnOpen() {
         if (checkedOnOpen) return
         checkedOnOpen = true
+        removeOldDownloads()
         scope.launch { if (settings.current().autoUpdateCheck) check(quiet = true) }
     }
 
@@ -98,7 +103,7 @@ class Updater(private val context: Context, private val settings: SettingsStore,
             return
         }
         _state.value = UpdateState.Downloading(release, 0)
-        scope.launch(Dispatchers.IO) { _state.value = downloadAndCommit(release) }
+        scope.launch(Dispatchers.IO) { _state.value = download(release) }
     }
 
     /** The user came back from the "install unknown apps" setting; carry on if they allowed it. */
@@ -107,83 +112,89 @@ class Updater(private val context: Context, private val settings: SettingsStore,
         if (context.packageManager.canRequestPackageInstalls()) install(s.release)
     }
 
-    private fun downloadAndCommit(release: Release): UpdateState {
-        val installer = context.packageManager.packageInstaller
-        val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
-            setAppPackageName(context.packageName)
-            // An app that silently installs APKs it downloaded looks like a malware dropper to Play Protect,
-            // so every update goes through Android's own confirm screen.
-            setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_REQUIRED)
-            if (release.size > 0) setSize(release.size)
-        }
-        val sessionId = installer.createSession(params)
-        val session = installer.openSession(sessionId)
-        try {
-            val digest = MessageDigest.getInstance("SHA-256")
-            val conn = URL(release.apkUrl).openConnection() as HttpURLConnection
-            try {
-                conn.connectTimeout = TIMEOUT_MS
-                conn.readTimeout = TIMEOUT_MS
-                if (conn.responseCode != HttpURLConnection.HTTP_OK) throw IOException("HTTP ${conn.responseCode}")
-                val total = conn.contentLengthLong.takeIf { it > 0 } ?: release.size
-                // Streams straight into the installer: no copy of the APK is left lying in the app's storage.
-                conn.inputStream.use { input ->
-                    session.openWrite("base.apk", 0, if (total > 0) total else -1).use { out ->
-                        val buffer = ByteArray(64 * 1024)
-                        var written = 0L
-                        var shown = 0
-                        while (true) {
-                            val n = input.read(buffer)
-                            if (n < 0) break
-                            out.write(buffer, 0, n)
-                            digest.update(buffer, 0, n)
-                            written += n
-                            val percent = if (total > 0) (written * 100 / total).toInt().coerceAtMost(100) else 0
-                            if (percent != shown) {
-                                shown = percent
-                                _state.value = UpdateState.Downloading(release, percent)
-                            }
-                        }
-                        session.fsync(out)
-                    }
+    /**
+     * Android's DownloadManager fetches the file and Android's own installer installs it, the way a browser
+     * download would. Streaming the APK into a PackageInstaller session from inside the app is the pattern
+     * malware droppers use, and Play Protect judged the app harmful while it did that.
+     */
+    private suspend fun download(release: Release): UpdateState {
+        val downloads = context.getSystemService(DownloadManager::class.java)
+        val name = "valitreeni-${release.versionName}.apk"
+        removeOldDownloads()
+        val id = downloads.enqueue(
+            DownloadManager.Request(release.apkUrl.toUri())
+                .setTitle(name)
+                .setMimeType(APK_MIME)
+                // The app's own folder needs no storage permission and isn't shown in the user's Downloads.
+                .setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, name),
+        )
+        while (true) {
+            val (status, done, total) = downloads.query(DownloadManager.Query().setFilterById(id)).use { c ->
+                if (!c.moveToFirst()) return UpdateState.Failed(release, FailReason.DOWNLOAD)
+                Triple(
+                    c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)),
+                    c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)),
+                    c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)).takeIf { it > 0 } ?: release.size,
+                )
+            }
+            when (status) {
+                DownloadManager.STATUS_SUCCESSFUL -> break
+                DownloadManager.STATUS_FAILED -> {
+                    downloads.remove(id)
+                    return UpdateState.Failed(release, FailReason.DOWNLOAD)
                 }
-            } finally {
-                conn.disconnect()
             }
-            val actual = digest.digest().joinToString("") { "%02x".format(it) }
-            if (release.sha256 != null && actual != release.sha256) {
-                session.abandon()
-                return UpdateState.Failed(release, FailReason.DAMAGED)
-            }
-            pending = release
-            session.commit(InstallResultReceiver.statusReceiver(context, sessionId))
-            session.close()
-            return UpdateState.Installing(release)
-        } catch (_: IOException) {
-            session.abandon()
-            return UpdateState.Failed(release, FailReason.DOWNLOAD)
+            val percent = if (total > 0) (done * 100 / total).toInt().coerceIn(0, 100) else 0
+            _state.value = UpdateState.Downloading(release, percent)
+            delay(POLL_MS)
         }
+        val uri = downloads.getUriForDownloadedFile(id) ?: return UpdateState.Failed(release, FailReason.DOWNLOAD)
+        if (release.sha256 != null && sha256Of(uri) != release.sha256) {
+            downloads.remove(id)
+            return UpdateState.Failed(release, FailReason.DAMAGED)
+        }
+        // Deprecated only in favour of PackageInstaller sessions, which is exactly what this avoids;
+        // EXTRA_RETURN_RESULT lets the UI tell a cancel from a failure.
+        @Suppress("DEPRECATION")
+        val intent = Intent(Intent.ACTION_INSTALL_PACKAGE)
+            .setDataAndType(uri, APK_MIME)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            .putExtra(Intent.EXTRA_RETURN_RESULT, true)
+        return UpdateState.Confirm(release, intent)
     }
 
-    internal fun onNeedsConfirm(intent: Intent) {
-        pending?.let { _state.value = UpdateState.Confirm(it, intent) }
+    private fun sha256Of(uri: Uri): String? = try {
+        val digest = MessageDigest.getInstance("SHA-256")
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            val buffer = ByteArray(64 * 1024)
+            while (true) {
+                val n = input.read(buffer)
+                if (n < 0) break
+                digest.update(buffer, 0, n)
+            }
+        } ?: return null
+        digest.digest().joinToString("") { "%02x".format(it) }
+    } catch (_: IOException) {
+        null
     }
 
-    /** The UI has shown the system dialog; don't open it again on the next recomposition. */
+    /** An installed update's APK is dead weight; also keeps DownloadManager from renaming the next one to "-1.apk". */
+    private fun removeOldDownloads() {
+        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)?.listFiles { f -> f.name.endsWith(".apk") }?.forEach { it.delete() }
+    }
+
+    /** The UI has opened Android's installer; don't open it again on the next recomposition. */
     fun confirmShown() {
         (_state.value as? UpdateState.Confirm)?.let { _state.value = UpdateState.Installing(it.release) }
     }
 
-    internal fun onCancelled() {
-        pending?.let { _state.value = UpdateState.Available(it) }
-    }
-
-    internal fun onFailed() {
-        _state.value = UpdateState.Failed(pending, FailReason.INSTALL)
-    }
-
-    internal fun onInstalled() {
-        // Usually unseen: Android restarts the app with the new version.
-        _state.value = UpdateState.UpToDate
+    /** What Android's installer answered. On success Android restarts the app, so this rarely sees it. */
+    fun onInstallResult(resultCode: Int) {
+        val release = (_state.value as? UpdateState.Installing)?.release ?: return
+        _state.value = when (resultCode) {
+            Activity.RESULT_OK -> UpdateState.UpToDate
+            Activity.RESULT_CANCELED -> UpdateState.Available(release)
+            else -> UpdateState.Failed(release, FailReason.INSTALL)
+        }
     }
 }
