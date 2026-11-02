@@ -111,8 +111,9 @@ class Updater(private val context: Context, private val settings: SettingsStore,
         val installer = context.packageManager.packageInstaller
         val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
             setAppPackageName(context.packageName)
-            // Once this app has installed the running version, Android may update without asking again.
-            setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
+            // An app that silently installs APKs it downloaded looks like a malware dropper to Play Protect,
+            // so every update goes through Android's own confirm screen.
+            setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_REQUIRED)
             if (release.size > 0) setSize(release.size)
         }
         val sessionId = installer.createSession(params)

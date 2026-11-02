@@ -42,7 +42,7 @@ Välitreeni (Finnish for "in-between workout") is an Android app for doing bodyw
 - English and Finnish.
 - Light and dark mode.
 - Your training stays on your phone: no account, no ads, no tracking. The app goes online only to check this page for a newer version, and you can turn that off.
-- Updates itself. When a new version is out, the Today screen offers it, and one tap installs it.
+- Updates itself. When a new version is out, the Today screen offers it; tap **Update**, then confirm in Android's own dialog.
 
 ## Get it
 
@@ -52,7 +52,7 @@ Välitreeni runs on **Android 15 or newer**. It isn't on Google Play; you instal
 2. Open the downloaded file. Android asks you to allow installing apps from your browser. Allow it, go back, and tap **Install**.
 3. Open Välitreeni and allow notifications, so the reminders can reach you.
 
-From then on the app updates itself. The first time it does, Android asks you to allow Välitreeni to install updates.
+From then on the app updates itself. The first time it does, Android asks you to allow Välitreeni to install updates. Every update then asks you to confirm with **Update**, so nothing installs behind your back.
 
 ### Make sure reminders arrive
 

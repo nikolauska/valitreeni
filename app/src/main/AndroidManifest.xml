@@ -13,8 +13,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- The app is shared outside Play, so it installs its own updates. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <!-- After the first in-app update, later ones can install without the confirm dialog. -->
-    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
 
     <application
         android:name=".FitApp"

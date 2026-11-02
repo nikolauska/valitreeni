@@ -19,6 +19,8 @@ cd "$(dirname "$0")/.."
 git fetch -q --tags origin main
 git merge-base --is-ancestor origin/main HEAD || die "origin/main has commits you don't have; pull first"
 git rev-parse -q --verify "refs/tags/v$version" >/dev/null && die "v$version already exists"
+# The release workflow signs with this; without it the tag would only produce a failed build.
+[[ -f app/signing/lineage.bin ]] || die "app/signing/lineage.bin is missing; see \"Signing key\" in CONTRIBUTING.md"
 
 code() { IFS=. read -r a b c <<<"$1"; echo $((10#$a * 10000 + 10#$b * 100 + 10#$c)); }
 current=$(sed -n 's/^valitreeni.version=//p' gradle.properties)

@@ -27,7 +27,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
 
       # The release build runs R8, which can break reflection-based code that the debug build never exercises.
-      # Without the signing secrets it comes out unsigned, which is enough to prove it builds.
+      # Gradle always builds it unsigned (scripts/sign-release.sh signs releases), which is enough to prove it builds.
       - name: Test, lint and build
         run: ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
 

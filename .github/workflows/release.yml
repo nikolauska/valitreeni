@@ -18,8 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TAG: ${{ github.ref_name }}
-      # The key every installed copy was signed with; phones refuse an update signed with any other.
-      EXPECTED_CERT: d604326dee1286e824eb86b4e76b86d1f0810c988fa4e860f9e41f80f90bbbde
     steps:
       - uses: actions/checkout@v5
 
@@ -44,21 +42,15 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
 
       - name: Test and build
-        env:
-          STORE_PASSWORD: ${{ secrets.VALITREENI_STORE_PASSWORD }}
-        run: >
-          ./gradlew testDebugUnitTest assembleRelease
-          -Pvalitreeni.storeFile="$RUNNER_TEMP/release.jks"
-          -Pvalitreeni.storePassword="$STORE_PASSWORD"
-          -Pvalitreeni.keyAlias=valitreeni
+        run: ./gradlew testDebugUnitTest assembleRelease
 
-      - name: Check the signature
-        run: |
-          apk=app/build/outputs/apk/release/app-release.apk
-          build_tools=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
-          cert=$("$build_tools/apksigner" verify --print-certs "$apk" | sed -n 's/.*certificate SHA-256 digest: //p' | head -1)
-          [[ "$cert" == "$EXPECTED_CERT" ]] || { echo "::error::APK signed with '$cert', not the release key"; exit 1; }
-          cp "$apk" "valitreeni-$VERSION.apk"
+      # Signs with the current key plus app/signing/lineage.bin, which is how phones still holding the
+      # original key accept it. The script refuses a lineage that doesn't start at the key on those phones.
+      - name: Sign
+        env:
+          VALITREENI_STORE_FILE: ${{ runner.temp }}/release.jks
+          VALITREENI_STORE_PASSWORD: ${{ secrets.VALITREENI_STORE_PASSWORD }}
+        run: scripts/sign-release.sh app/build/outputs/apk/release/app-release-unsigned.apk "valitreeni-$VERSION.apk"
 
       - name: Publish the release
         env:

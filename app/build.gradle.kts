@@ -31,7 +31,7 @@ android {
         // Lives in ~/.gradle/gradle.properties, never in the repo: anyone with the key could push updates to every phone.
         val storeFile = providers.gradleProperty("valitreeni.storeFile").orNull
         if (storeFile != null) {
-            create("release") {
+            create("valitreeni") {
                 this.storeFile = file(storeFile)
                 storePassword = providers.gradleProperty("valitreeni.storePassword").get()
                 keyAlias = providers.gradleProperty("valitreeni.keyAlias").get()
@@ -42,6 +42,8 @@ android {
 
     buildTypes {
         debug {
+            // A debug build installs over a release one only when it's signed with the current release key.
+            signingConfigs.findByName("valitreeni")?.let { signingConfig = it }
             // Lets the update flow be tested against a local server without publishing a release.
             providers.gradleProperty("valitreeni.updateUrl").orNull?.let { buildConfigField("String", "UPDATE_URL", "\"$it\"") }
         }
@@ -50,7 +52,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-            signingConfig = signingConfigs.findByName("release")
+            // Left unsigned on purpose: scripts/sign-release.sh adds the key-rotation lineage, which AGP can't.
+            signingConfig = null
         }
     }
 
