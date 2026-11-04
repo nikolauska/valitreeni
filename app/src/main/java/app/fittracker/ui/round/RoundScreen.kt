@@ -5,7 +5,9 @@ package app.fittracker.ui.round
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.VibratorManager
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +43,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,10 +57,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -128,6 +132,9 @@ private fun Guided(
     val e = set.exercise
     val brand = MaterialTheme.brand
     val next = plan.sets.getOrNull(index + 1)?.let { exerciseName(it.exercise) }
+    // Keyed by the move too: "Easier version" swaps the move at the same index, and its hold
+    // time must not inherit the harder move's countdown.
+    val timer = if (e.unit == MoveUnit.SECONDS) rememberHoldTimer(set.amount, index, e.id) else null
     Scaffold(
         topBar = {
             TopAppBar(
@@ -161,9 +168,16 @@ private fun Guided(
                     // The tile owns the width and the figure inside may shrink. With fillMaxWidth on the
                     // figure itself, its aspect ratio couldn't be met when the timer took the height, so
                     // the canvas was measured too tall and drew over the timer.
+                    val tileShape = RoundedCornerShape(16.dp)
+                    val holdFill = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                    // The countdown ticks once a second; easing between ticks keeps the fill from stepping.
+                    val holdProgress by animateFloatAsState(timer?.progress ?: 0f, tween(1_000, easing = LinearEasing), label = "hold")
                     Box(
                         Modifier.fillMaxWidth().weight(1f, fill = false)
-                            .background(brand.track, RoundedCornerShape(16.dp)).padding(12.dp),
+                            .clip(tileShape).background(brand.track)
+                            // Hold progress fills the figure's tile, so the timer below needs no ring of its own.
+                            .drawBehind { if (holdProgress > 0f) drawRect(holdFill, size = Size(size.width * holdProgress, size.height)) }
+                            .padding(12.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         MoveFigure(
@@ -173,8 +187,8 @@ private fun Guided(
                             accent = brand.accent,
                         )
                     }
-                    if (e.unit == MoveUnit.SECONDS) {
-                        HoldTimer(seconds = set.amount, key = index)
+                    if (timer != null) {
+                        HoldCountdown(timer)
                     } else {
                         Text(set.amount.toString(), style = MaterialTheme.typography.displayLarge)
                         Text(
@@ -273,57 +287,65 @@ private fun Tip(set: PlannedSet, onOpenTutorial: (Long) -> Unit) {
     }
 }
 
-@Composable
-private fun HoldTimer(seconds: Int, key: Int) {
-    val context = LocalContext.current
-    val brand = MaterialTheme.brand
-    var remaining by rememberSaveable(key) { mutableIntStateOf(seconds) }
-    var running by rememberSaveable(key) { mutableStateOf(false) }
-    LaunchedEffect(running, key) {
-        while (running && remaining > 0) {
-            delay(1_000)
-            remaining--
-        }
-        if (running && remaining == 0) {
-            running = false
-            buzz(context)
-        }
-    }
-    Box(Modifier.size(170.dp), contentAlignment = Alignment.Center) {
-        val track = brand.track
-        val fill = MaterialTheme.colorScheme.primary
-        Canvas(Modifier.fillMaxSize()) {
-            val stroke = 10.dp.toPx()
-            val arc = Size(size.width - stroke, size.height - stroke)
-            val style = Stroke(stroke, cap = StrokeCap.Round)
-            drawArc(track, 0f, 360f, false, Offset(stroke / 2, stroke / 2), arc, style = style)
-            val fraction = remaining.toFloat() / seconds.coerceAtLeast(1)
-            if (fraction > 0f) drawArc(fill, -90f, 360f * fraction, false, Offset(stroke / 2, stroke / 2), arc, style = style)
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                if (remaining == 0) stringResource(R.string.round_timer_up) else "%d:%02d".format(remaining / 60, remaining % 60),
-                style = MaterialTheme.typography.displayMedium,
-                // Announced once a second would be noise; TalkBack users hear only the end.
-                modifier = Modifier.semantics { if (remaining == 0) liveRegion = LiveRegionMode.Polite },
-            )
-            Text(stringResource(R.string.round_timer_of, seconds), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-    FilledTonalButton(onClick = {
+/** Countdown for a timed move. Lives in [Guided] so the figure tile and the number below it share it. */
+@Stable
+private class HoldTimer(val seconds: Int, remainingState: MutableIntState, runningState: MutableState<Boolean>) {
+    var remaining by remainingState
+    var running by runningState
+    val progress: Float get() = 1f - remaining.toFloat() / seconds.coerceAtLeast(1)
+
+    fun toggle() {
         if (remaining == 0) {
             remaining = seconds
             running = true
         } else {
             running = !running
         }
-    }) {
+    }
+}
+
+@Composable
+private fun rememberHoldTimer(seconds: Int, index: Int, exerciseId: Long): HoldTimer {
+    val context = LocalContext.current
+    // Saveable so rotating the phone or the app being killed mid-hold doesn't restart the countdown.
+    val remaining = rememberSaveable(index, exerciseId) { mutableIntStateOf(seconds) }
+    val running = rememberSaveable(index, exerciseId) { mutableStateOf(false) }
+    val timer = remember(seconds, remaining, running) { HoldTimer(seconds, remaining, running) }
+    LaunchedEffect(timer, timer.running) {
+        while (timer.running && timer.remaining > 0) {
+            delay(1_000)
+            timer.remaining--
+        }
+        if (timer.running && timer.remaining == 0) {
+            timer.running = false
+            buzz(context)
+        }
+    }
+    return timer
+}
+
+/** Shown where a rep move shows its count, so timed and rep moves read the same way. */
+@Composable
+private fun HoldCountdown(timer: HoldTimer) {
+    val remaining = timer.remaining
+    Text(
+        if (remaining == 0) stringResource(R.string.round_timer_up) else "%d:%02d".format(remaining / 60, remaining % 60),
+        style = MaterialTheme.typography.displayLarge,
+        // Announced once a second would be noise; TalkBack users hear only the end.
+        modifier = Modifier.semantics { if (remaining == 0) liveRegion = LiveRegionMode.Polite },
+    )
+    Text(
+        stringResource(R.string.round_timer_of, timer.seconds),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    FilledTonalButton(onClick = timer::toggle) {
         Text(
             stringResource(
                 when {
                     remaining == 0 -> R.string.round_timer_again
-                    running -> R.string.round_timer_pause
-                    remaining < seconds -> R.string.round_timer_resume
+                    timer.running -> R.string.round_timer_pause
+                    remaining < timer.seconds -> R.string.round_timer_resume
                     else -> R.string.round_timer_start
                 },
             ),
