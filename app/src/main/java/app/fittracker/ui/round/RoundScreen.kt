@@ -4,7 +4,8 @@ package app.fittracker.ui.round
 
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.RingtoneManager
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.compose.animation.core.LinearEasing
@@ -363,18 +364,30 @@ private fun buzz(context: Context) {
 }
 
 /**
- * The user's own notification sound, for when the phone is out of reach and a buzz on the floor is easy
- * to miss. Played as a notification so silent mode, vibrate mode and Do Not Disturb keep it quiet.
+ * The app's own chime (scripts/hold-chime.py), for when the phone is out of reach and a buzz on the floor is
+ * easy to miss. The default message sound was too quiet and too familiar to notice. Played as a
+ * notification so silent mode, vibrate mode and Do Not Disturb keep it quiet.
  */
 private fun chime(context: Context) {
-    val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION) ?: return
-    val ringtone = RingtoneManager.getRingtone(context.applicationContext, uri) ?: return
-    ringtone.audioAttributes = AudioAttributes.Builder()
+    val app = context.applicationContext
+    val attributes = AudioAttributes.Builder()
         .setUsage(AudioAttributes.USAGE_NOTIFICATION)
         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
         .build()
-    ringtone.play()
+    val sessionId = app.getSystemService(AudioManager::class.java)?.generateAudioSessionId() ?: return
+    val player = MediaPlayer.create(app, R.raw.hold_chime, attributes, sessionId) ?: return
+    // Held until it finishes: a MediaPlayer nothing references gets garbage-collected mid-sound, which
+    // cut the chime off after about half a second on the emulator.
+    chimePlayer?.release()
+    chimePlayer = player
+    player.setOnCompletionListener {
+        it.release()
+        if (chimePlayer === it) chimePlayer = null
+    }
+    player.start()
 }
+
+private var chimePlayer: MediaPlayer? = null
 
 @Composable
 private fun Finished(logged: Int, onBack: () -> Unit) {
