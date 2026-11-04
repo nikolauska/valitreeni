@@ -3,6 +3,8 @@
 package app.fittracker.ui.round
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.compose.animation.core.LinearEasing
@@ -319,6 +321,7 @@ private fun rememberHoldTimer(seconds: Int, index: Int, exerciseId: Long): HoldT
         if (timer.running && timer.remaining == 0) {
             timer.running = false
             buzz(context)
+            chime(context)
         }
     }
     return timer
@@ -357,6 +360,20 @@ private fun HoldCountdown(timer: HoldTimer) {
 private fun buzz(context: Context) {
     val vibrator = context.getSystemService(VibratorManager::class.java)?.defaultVibrator ?: return
     vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 180, 120, 180), -1))
+}
+
+/**
+ * The user's own notification sound, for when the phone is out of reach and a buzz on the floor is easy
+ * to miss. Played as a notification so silent mode, vibrate mode and Do Not Disturb keep it quiet.
+ */
+private fun chime(context: Context) {
+    val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION) ?: return
+    val ringtone = RingtoneManager.getRingtone(context.applicationContext, uri) ?: return
+    ringtone.audioAttributes = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+        .build()
+    ringtone.play()
 }
 
 @Composable
