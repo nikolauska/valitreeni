@@ -158,14 +158,21 @@ private fun Guided(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
                 ) {
-                    MoveFigure(
-                        Poses.forKey(e.builtIn?.key),
-                        contentDescription = exerciseName(e),
-                        modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
+                    // The tile owns the width and the figure inside may shrink. With fillMaxWidth on the
+                    // figure itself, its aspect ratio couldn't be met when the timer took the height, so
+                    // the canvas was measured too tall and drew over the timer.
+                    Box(
+                        Modifier.fillMaxWidth().weight(1f, fill = false)
                             .background(brand.track, RoundedCornerShape(16.dp)).padding(12.dp),
-                        color = brand.figure,
-                        accent = brand.accent,
-                    )
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        MoveFigure(
+                            Poses.forKey(e.builtIn?.key),
+                            contentDescription = exerciseName(e),
+                            color = brand.figure,
+                            accent = brand.accent,
+                        )
+                    }
                     if (e.unit == MoveUnit.SECONDS) {
                         HoldTimer(seconds = set.amount, key = index)
                     } else {
