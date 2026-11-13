@@ -49,12 +49,13 @@ class ReminderScheduler(private val context: Context, private val settings: Sett
         setAlarm(at, alarmIntent(snooze = true))
     }
 
-    // Lint only knows SCHEDULE_EXACT_ALARM; USE_EXACT_ALARM is declared and the call is guarded below.
+    // Lint can't tell that USE_EXACT_ALARM (Android 13+) or SCHEDULE_EXACT_ALARM (Android 12) covers this; the call is guarded below.
     @SuppressLint("MissingPermission")
     private fun setAlarm(at: Instant, intent: PendingIntent) {
         // Inexact alarms got a 1-hour delivery window on Android 16, far too loose for clock-time
-        // reminders. USE_EXACT_ALARM is granted at install for this sideloaded app; the inexact call
-        // is only a fallback in case the system ever revokes exact alarms.
+        // reminders. USE_EXACT_ALARM is granted at install for this sideloaded app; on Android 12 the
+        // user can revoke SCHEDULE_EXACT_ALARM, and the inexact call keeps reminders coming until they
+        // allow it again from the Today screen.
         if (alarms.canScheduleExactAlarms()) {
             alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at.toEpochMilli(), intent)
         } else {

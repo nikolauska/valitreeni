@@ -93,6 +93,7 @@
     <string name="banner_turn_on">Ota käyttöön</string>
     <string name="banner_battery">Salli taustakäyttö, jotta muistutukset tulevat ajallaan.</string>
     <string name="banner_fix">Korjaa</string>
+    <string name="banner_exact_alarms">Salli hälytykset ja muistutukset, jotta muistutukset tulevat ajallaan.</string>
     <string name="banner_missed_reminder">Klo %s muistutus ei tullut perille. Akunsäästö luultavasti esti sen.</string>
     <string name="banner_dismiss">OK</string>
 

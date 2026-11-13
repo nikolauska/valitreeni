@@ -1,6 +1,7 @@
 package app.fittracker.ui.settings
 
 import android.app.LocaleManager
+import android.os.Build
 import android.os.LocaleList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,7 +23,11 @@ enum class AppLanguage(val tag: String?) { SYSTEM(null), ENGLISH("en"), FINNISH(
 
 class SettingsViewModel(private val app: FitApp) : ViewModel() {
     private val store = app.settings
-    private val locales = app.getSystemService(LocaleManager::class.java)
+    // Per-app language arrived in Android 13; older phones simply follow the phone's language.
+    private val locales: LocaleManager? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) app.getSystemService(LocaleManager::class.java) else null
+
+    val languageSupported: Boolean get() = locales != null
 
     val state: StateFlow<SettingsUiState?> =
         combine(store.settings, app.repository.observeMoves(app.repository.today())) { s, m -> SettingsUiState(s, m) }
@@ -55,12 +60,14 @@ class SettingsViewModel(private val app: FitApp) : ViewModel() {
     }
 
     fun language(): AppLanguage {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || locales == null) return AppLanguage.SYSTEM
         val tag = locales.applicationLocales.takeIf { !it.isEmpty }?.get(0)?.language
         return AppLanguage.entries.firstOrNull { it.tag == tag } ?: AppLanguage.SYSTEM
     }
 
     /** Uses Android's per-app language, so the choice also shows in system settings and survives restarts. */
     fun setLanguage(language: AppLanguage) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || locales == null) return
         locales.applicationLocales = language.tag?.let { LocaleList.forLanguageTags(it) } ?: LocaleList.getEmptyLocaleList()
     }
 

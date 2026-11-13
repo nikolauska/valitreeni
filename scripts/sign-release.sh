@@ -41,7 +41,7 @@ export STORE_PASSWORD=$store_password
 rm -f "$out"
 # --rotation-min-sdk-version 28 puts the new key in the plain v3 block, which every Android version the app
 # supports reads; the default (33) would only use it in v3.1 and keep the old key in the v2/v3 blocks.
-# v1 and v2 are off because Android 15, the oldest the app runs on, checks v3 first, and apksigner would
+# v1 and v2 are off because Android 12, the oldest the app runs on, checks v3 first, and apksigner would
 # need the old private key to sign them; keeping it around would undo the point of rotating.
 if ! result=$("$build_tools/apksigner" sign \
   --ks "$store_file" --ks-key-alias valitreeni --ks-pass env:STORE_PASSWORD \

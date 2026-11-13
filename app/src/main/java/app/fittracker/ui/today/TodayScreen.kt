@@ -3,6 +3,7 @@ package app.fittracker.ui.today
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -291,8 +292,9 @@ private fun Nudges(state: TodayUiState, onDismissMissed: () -> Unit) {
     val update by updater.state.collectAsStateWithLifecycle()
 
     // Ask once per app start; Android itself stops showing the dialog after the user declines twice.
+    // Before Android 13 there is no notification permission to ask for; the banner below opens settings instead.
     LaunchedEffect(status.notificationsEnabled) {
-        if (!status.notificationsEnabled && !askedOnce) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !status.notificationsEnabled && !askedOnce) {
             askedOnce = true
             permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -314,6 +316,15 @@ private fun Nudges(state: TodayUiState, onDismissMissed: () -> Unit) {
             Nudge(stringResource(R.string.banner_notifications_off), stringResource(R.string.banner_turn_on)) {
                 context.startActivity(
                     Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName),
+                )
+            }
+        }
+        // Only reachable before Android 13: USE_EXACT_ALARM can't be revoked, but Android 12's
+        // SCHEDULE_EXACT_ALARM can be, under "Alarms & reminders".
+        if (!status.exactAlarmsAllowed) {
+            Nudge(stringResource(R.string.banner_exact_alarms), stringResource(R.string.banner_turn_on)) {
+                context.startActivity(
+                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, "package:${context.packageName}".toUri()),
                 )
             }
         }

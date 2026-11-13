@@ -46,7 +46,7 @@ Välitreeni (Finnish for "in-between workout") is an Android app for doing bodyw
 
 ## Get it
 
-Välitreeni runs on **Android 15 or newer**. It isn't on Google Play; you install it from here.
+Välitreeni runs on **Android 12 or newer**. It isn't on Google Play; you install it from here.
 
 1. On your phone, open **[the latest release](https://github.com/nikolauska/valitreeni/releases/latest)** and tap the `.apk` file to download it.
 2. Open the downloaded file. Android asks you to allow installing apps from your browser. Allow it, go back, and tap **Install**.

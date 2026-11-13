@@ -93,6 +93,7 @@
     <string name="banner_turn_on">Turn on</string>
     <string name="banner_battery">Allow background use so reminders arrive on time.</string>
     <string name="banner_fix">Fix</string>
+    <string name="banner_exact_alarms">Allow alarms and reminders so reminders arrive on time.</string>
     <string name="banner_missed_reminder">The %s reminder didn\'t arrive. Battery saving probably blocked it.</string>
     <string name="banner_dismiss">OK</string>
 

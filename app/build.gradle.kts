@@ -18,8 +18,9 @@ android {
 
     defaultConfig {
         applicationId = "app.fittracker"
-        // Android 15 is the oldest phone it runs on; going lower would only add compat code.
-        minSdk = 35
+        // Android 12: older phones lack the exact-alarm permission model reminders rely on, and
+        // the v3 signature with the rotated key needs Android 9+ anyway.
+        minSdk = 31
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersion

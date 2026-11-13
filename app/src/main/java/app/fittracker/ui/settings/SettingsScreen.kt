@@ -138,11 +138,13 @@ fun SettingsScreen(onEditExercise: (Long) -> Unit, onAddExercise: () -> Unit) {
                     }
                 }
             }
-            item {
-                FitCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                        Text(stringResource(R.string.settings_language), style = MaterialTheme.typography.titleMedium)
-                        LanguagePicker(vm)
+            if (vm.languageSupported) {
+                item {
+                    FitCard(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                            Text(stringResource(R.string.settings_language), style = MaterialTheme.typography.titleMedium)
+                            LanguagePicker(vm)
+                        }
                     }
                 }
             }

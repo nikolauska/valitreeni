@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Android 15+ draws apps edge-to-edge anyway; opting in explicitly keeps insets handling in our hands.
+        // Android 15+ draws apps edge-to-edge anyway; opting in on older versions too keeps every phone laid out the same.
         enableEdgeToEdge()
         // Only a fresh launch counts; after a rotation the round screen is already restored.
         if (savedInstanceState == null) handleIntent(intent)

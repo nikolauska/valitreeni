@@ -1,5 +1,6 @@
 package app.fittracker.ui.today
 
+import android.app.AlarmManager
 import android.content.Context
 import android.os.PowerManager
 import androidx.core.app.NotificationManagerCompat
@@ -11,13 +12,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleResumeEffect
 
-data class SystemStatus(val notificationsEnabled: Boolean, val batteryUnrestricted: Boolean)
+data class SystemStatus(val notificationsEnabled: Boolean, val batteryUnrestricted: Boolean, val exactAlarmsAllowed: Boolean)
 
 fun readSystemStatus(context: Context): SystemStatus {
     val power = context.getSystemService(PowerManager::class.java)
     return SystemStatus(
         notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled(),
         batteryUnrestricted = power.isIgnoringBatteryOptimizations(context.packageName),
+        exactAlarmsAllowed = context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms(),
     )
 }
 
